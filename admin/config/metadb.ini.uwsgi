@@ -1,0 +1,14 @@
+[uwsgi]
+debug = true
+vhost = true
+uid = metadb
+gid = www-data
+socket = /tmp/metadb.uwsgi.sock
+module = webserver
+callable = create_app()
+chdir = /home/metadb/metadb
+virtualenv = /home/metadb/ve
+pythonpath = /home/metadb/ve/lib/python2.7/site-packages
+enable-threads = true
+processes = 20
+stats = :5051

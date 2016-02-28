@@ -7,9 +7,6 @@ if [ $# -eq 1 ]; then
   sed -i "s/archive.ubuntu.com/$1/" /etc/apt/sources.list
 fi
 
-apt-get update
-apt-get -y upgrade
-
 cd metadb
 bash ./admin/install_database.sh
 bash ./admin/install_web_server.sh

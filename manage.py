@@ -58,17 +58,15 @@ def init_db(force):
 
     db.init_db_engine(config.SQLALCHEMY_DATABASE_URI)
 
-    app = create_app()
-    with app.app_context():
-        print('Creating tables...')
-        db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_tables.sql'))
+    print('Creating tables...')
+    db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_tables.sql'))
 
-        print('Creating primary and foreign keys...')
-        db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_primary_keys.sql'))
-        db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_foreign_keys.sql'))
+    print('Creating primary and foreign keys...')
+    db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_primary_keys.sql'))
+    db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_foreign_keys.sql'))
 
-        print('Creating indexes...')
-        db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_indexes.sql'))
+    print('Creating indexes...')
+    db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_indexes.sql'))
 
     print("Done!")
 
@@ -78,29 +76,23 @@ def init_db(force):
 def init_test_db(force=False):
     """Same as `init_db` command, but creates a database that will be used to run tests.
 
-    `PG_CONNECT_TEST` variable must be defined in the config file.
+    `TEST_SQLALCHEMY_DATABASE_URI` variable must be defined in the config file.
     """
     if force:
-        exit_code = subprocess.call('psql -U ' + config.PG_SUPER_USER + ' < ' +
-                                    os.path.join(ADMIN_SQL_DIR, 'drop_test_db.sql'),
-                                    shell=True)
+        exit_code = _run_psql('drop_test_db.sql')
         if exit_code != 0:
             raise Exception('Failed to drop existing database and user! Exit code: %i' % exit_code)
 
     print('Creating database and user for testing...')
-    exit_code = subprocess.call('psql -U ' + config.PG_SUPER_USER + ' < ' +
-                                os.path.join(ADMIN_SQL_DIR, 'create_test_db.sql'),
-                                shell=True)
+    exit_code = _run_psql('create_test_db.sql')
     if exit_code != 0:
         raise Exception('Failed to create new database and user! Exit code: %i' % exit_code)
 
-    exit_code = subprocess.call('psql -U ' + config.PG_SUPER_USER + ' -d mdb_test < ' +
-                                os.path.join(ADMIN_SQL_DIR, 'create_extensions.sql'),
-                                shell=True)
+    exit_code = _run_psql('create_extensions.sql', 'mdb_test')
     if exit_code != 0:
         raise Exception('Failed to create database extensions! Exit code: %i' % exit_code)
 
-    db.init_db_connection(config.PG_CONNECT_TEST)
+    db.init_db_engine(config.TEST_SQLALCHEMY_DATABASE_URI)
 
     db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_tables.sql'))
     db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_primary_keys.sql'))

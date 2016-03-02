@@ -1,4 +1,5 @@
 from flask import render_template
+import webserver.exceptions
 
 
 def init_error_handlers(app):

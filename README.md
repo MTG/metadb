@@ -7,7 +7,7 @@ metadb
 
 The easiest way to start is to setup ready-to-use [Vagrant](https://www.vagrantup.com/)
 VM. To do that [download](https://www.vagrantup.com/downloads.html) and install
-Vagrant for your OS. Then copy two config files:
+Vagrant for your OS. Then copy the config files:
 
 1. `config.py.sample` to `config.py` *(you don't need to modify this file)*
 
@@ -26,7 +26,7 @@ You can start the web server (will be available at http://127.0.0.1:8080/):
 
     $ vagrant ssh
     $ cd metadb
-    $ python server.py
+    $ python manage.py runserver
 
 There are some shortcuts defined using fabric to perform commonly used
 commands:

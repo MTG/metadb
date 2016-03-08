@@ -14,7 +14,7 @@ def scrape(mbid, artist, title, metadata=None):
 
     data = None  
     try:
-        d = discogs_client.Client('AB_Discogs/0.1', user_token="qnySAoSOYusdpbAvSvbXDnSqMyzgpATQqTLlnklk")
+        d = discogs_client.Client('AB_Discogs/0.1', user_token=DISCOGS_KEY)
         results = d.search(artist=artist, track=title)
         data = []
         #i = 0

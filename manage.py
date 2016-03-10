@@ -13,7 +13,7 @@ cli = click.Group()
 
 def _run_psql(script, database=None):
     script = os.path.join(ADMIN_SQL_DIR, script)
-    command = ['psql', '-U', config.PG_SUPER_USER, '-f', script]
+    command = ['psql', '-p', config.PG_PORT, '-U', config.PG_SUPER_USER, '-f', script]
     if database:
         command.extend(['-d', database])
     exit_code = subprocess.call(command)

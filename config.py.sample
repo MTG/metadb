@@ -14,6 +14,7 @@ TEST_SQLALCHEMY_DATABASE_URI = "postgresql://mdb_test@/mdb_test"
 # The name of a postgres user who has superuser privileges. Your local user should
 # be able to connect to the database with this user.
 PG_SUPER_USER = "postgres"
+PG_PORT = "5432"
 
 
 # CACHE

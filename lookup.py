@@ -57,12 +57,18 @@ def process(query):
         # Check if result file already exists
         outfile = query['mbid'] + '.json'
         if os.path.exists(outfile):
+            print "File", outfile, "found, skipping query"
             return
+    try:
+        result, result_type = module.scrape(query)
+    except Exception, e:
+        print str(e)
+        return
 
-    result, result_type = module.scrape(query)
+    # Save empty results too
     
-    if not result:
-        return 
+    #if not result:
+    #    return
         
     result = {
                 'type': result_type,

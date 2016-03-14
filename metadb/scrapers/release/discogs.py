@@ -19,7 +19,7 @@ def scrape(query):
     year = query['year']
 
     if not artist or not release or not year:
-        raise Exception("Artist, release, and year information is required")
+        raise Exception("Artist, release, and year information is required. Query: %s" % json.dumps(query))
     print "Scraping recording information for", mbid + ":", artist, "-", release, "-", year
     artist = artist.decode('utf8')
     release = release.decode('utf8')
@@ -37,7 +37,4 @@ def scrape(query):
     except ApiException as ex:
         raise
 
-    if data:
-        return data, TYPE
-    else:
-        return None, None
+    return data, TYPE

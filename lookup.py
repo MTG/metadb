@@ -3,8 +3,17 @@ import importlib
 import sys
 import csv
 import json
-import os.path
+import os
+import errno
 
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
 
 def _get_module_by_path(modulepath):
     try:
@@ -46,9 +55,10 @@ def process(module_path, data, save):
     if not data['mbid']:
         raise Exception("Missing MBID for the query", json.dumps(data))
 
+    outdir = os.path.join(module_path, data['mbid'][:2])
+    outfile = os.path.join(outdir, '%s.json' % data['mbid'])
     if save:
         # Check if result file already exists
-        outfile = data['mbid'] + '.json'
         if os.path.exists(outfile):
             print "File", outfile, "found, skipping query"
             return
@@ -66,6 +76,7 @@ def process(module_path, data, save):
              }
 
     if save:
+        mkdir_p(outdir)
         save_result(result, outfile)
     else:
         print result

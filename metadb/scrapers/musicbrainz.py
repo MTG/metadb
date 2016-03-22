@@ -13,32 +13,31 @@ mb.set_useragent(
 
 def scrape(mbid):
     try:
-        result = mb.get_recording_by_id(mbid, includes=["artists", "releases", "tags"])
+        recording = mb.get_recording_by_id(mbid, includes=["artists", "releases", "tags"])
         
-        recording_name = result["recording"]["title"] #recording title
+        recording_name = recording["recording"]["title"] #recording title
         
         artists = []
         
-        for item in result["recording"]["artist-credit"]:
+        for item in recording["recording"]["artist-credit"]:
             if isinstance(item, dict):
                 artists.append({"id": item["artist"]["id"], "name": item["artist"]["name"]})
         
         releases = []
         release_groups = []
         
-        for item in result["recording"]["release-list"]:
-            releases.append({"id": item["id"], "Title": item["title"], "Date": item["date"]})
+        for item in recording["recording"]["release-list"]:
+            releases.append({"id": item["id"], "title": item["title"], "date": item["date"]})
             
             #Request for retrieving release info
-            rel = mb.get_release_by_id(item["id"], includes = ["artists", "release-groups"])
+            release = mb.get_release_by_id(item["id"], includes = ["artists", "release-groups"])
+            release_group = {"id": release["release"]["release-group"]["id"], "title": release["release"]["release-group"]["title"]}
             
-            #Check if release group already exists in the list in order to eliminate dublicate instances
-            if not ({"id": rel["release"]["release-group"]["id"], "Title": rel["release"]["release-group"]["title"]}) in release_groups:
-                release_groups.append({"id": rel["release"]["release-group"]["id"], "Title": rel["release"]["release-group"]["title"]})
-            else:
-                print "Release-group already exists in the list!"
-  
+            #Check if release group already exists in the list in order to eliminate duplicate instances
+            if release_group not in release_groups:
+                release_groups.append(release_group)
+            
     except mb.MusicBrainzError as ex:
         raise
     
-    return {"Title": recording_name, "Artist": artists, "Releases": releases, "Realease-groups": release_groups}
+    return {"title": recording_name, "artist": artists, "releases": releases, "realease-groups": release_groups}

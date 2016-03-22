@@ -26,7 +26,7 @@ def scrape(mbid):
         releases = []
         release_groups = []
         
-        for item in result1["recording"]["release-list"]:
+        for item in result["recording"]["release-list"]:
             releases.append({"id": item["id"], "Title": item["title"], "Date": item["date"]})
             
             #Request for retrieving release info
@@ -41,4 +41,4 @@ def scrape(mbid):
     except mb.MusicBrainzError as ex:
         raise
     
-return {"Title": recording_name, "Artist": artists, "Releases": releases, "Realease-groups": release_groups}
+    return {"Title": recording_name, "Artist": artists, "Releases": releases, "Realease-groups": release_groups}

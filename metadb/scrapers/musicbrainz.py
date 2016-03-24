@@ -40,9 +40,9 @@ def scrape(mbid):
         
         for item in recording["recording"]["release-list"]:
             
-            # Request for release info --- TAGS include is not SUPPORTED in the get_release_by_id method????????
-            # release = mb.get_release_by_id(item["id"], includes = ["artists", "release-groups", "tags"])
-            release = mb.get_release_by_id(item["id"], includes = ["artists", "release-groups"])
+            # Request for release info
+            release = mb.get_release_by_id(item["id"], includes = ["artists", "release-groups", "tags"])
+            
             
             # Release group info
             release_group_id = release["release"]["release-group"]["id"]

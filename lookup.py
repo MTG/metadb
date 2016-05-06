@@ -57,12 +57,12 @@ def process(query):
         # Check if result file already exists
         outfile = query['mbid'] + '.json'
         if os.path.exists(outfile):
-            print "File", outfile, "found, skipping query"
+            print("File", outfile, "found, skipping query")
             return
     try:
         result, result_type = module.scrape(query)
-    except Exception, e:
-        print str(e)
+    except Exception as e:
+        print(str(e))
         return
 
     # Save empty results too
@@ -80,8 +80,8 @@ def process(query):
     if query['save']:
         save(result, outfile)
     else:
-        print result
-        print
+        print(result)
+        print()
 
 
 if __name__ == "__main__":
@@ -101,7 +101,7 @@ MetaDB metadata scraper.
 
     if args.csv:
         if args.artist or args.recording or args.release or args.mbid: 
-            print 'Performing queries using data in ', args.csv, 'file; --artist/--recording/--release/--mbid flags will be ignored'
+            print('Performing queries using data in ', args.csv, 'file; --artist/--recording/--release/--mbid flags will be ignored')
         process_file(args.module, args.csv, args.save)
 
     else:

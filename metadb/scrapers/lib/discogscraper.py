@@ -156,11 +156,11 @@ class DiscogScraper():
             Returns the dictionary with the merged data
         """
         if type(dic1) == type(dic2) == dict:
-            if len(dic1.keys())>=len(dic2.keys()):
+            if len(list(dic1.keys()))>=len(list(dic2.keys())):
                 target = dic1
                 source = dic2
             else:
-                if len(dic1.keys())==0:
+                if len(list(dic1.keys()))==0:
                     target = dic1.copy()
                     target = target.update(dic2)
                     #return target
@@ -168,7 +168,7 @@ class DiscogScraper():
                     target = dic2
                     source = dic1
                 
-            for k in target.keys():        
+            for k in list(target.keys()):        
                 if type(target[k])==list:
                     target[k] = sorted(set(target[k]+source[k]))
                 elif type(target[k])==int:
@@ -203,11 +203,11 @@ class DiscogScraper():
             Merge the genres key of the song dictionary keeping the counters consistent
             Returns the dictionary with the merged data
         """
-        if target['genres'].keys() == []:
+        if list(target['genres'].keys()) == []:
             for i in genres:
                 target['genres'][str(i).lower()] = 1
         else:
-            tgenres = target['genres'].keys()
+            tgenres = list(target['genres'].keys())
             for i in genres:
                 tmpg = str(i).lower()
                 if tmpg in tgenres:
@@ -230,11 +230,11 @@ class DiscogScraper():
             Merge the styles key of the song dictionary keeping the counters consistent
             Returns the dictionary with the merged data
         """
-        if target['styles'].keys() == []:
+        if list(target['styles'].keys()) == []:
             for i in styles:
                 target['styles'][str(i).lower()] = 1
         else:
-            tstyles = target['styles'].keys()
+            tstyles = list(target['styles'].keys())
             for i in styles:
                 tmpg = str(i).lower()
                 if tmpg in tstyles:

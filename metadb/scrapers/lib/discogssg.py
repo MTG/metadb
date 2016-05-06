@@ -5,7 +5,7 @@
 """
 import sys, os, shutil
 sys.path.append('./lib')
-import discogscraper as ds
+from . import discogscraper as ds
 
 myToken='myoEuQPZlLnuRtHokDXecKtWoeSYBzglFRKUsxcc'
 TYPE = 'Weighted song styles and genres from Discogs'

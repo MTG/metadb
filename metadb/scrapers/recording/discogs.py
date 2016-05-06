@@ -19,7 +19,7 @@ def scrape(query):
 
     if not artist or not title:
         raise Exception("Artist and recording strings are required")
-    print "Scraping recording information for", mbid, "-", artist, "-", title
+    print("Scraping recording information for", mbid, "-", artist, "-", title)
 
     title_simple = re.sub(r'\W+', '', title.lower())
 

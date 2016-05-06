@@ -1,5 +1,5 @@
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import json
 
 LASTFM_KEY = ""
@@ -18,12 +18,12 @@ def query(method, **kwargs):
         'User-Agent': 'lastfmapi',
     }
 
-    params = urllib.urlencode(params)
-    request = urllib2.Request(LASTFM_API_ENDPOINT, params, headers)
-    response = urllib2.urlopen(request).read()
+    params = urllib.parse.urlencode(params)
+    request = urllib.request.Request(LASTFM_API_ENDPOINT, params, headers)
+    response = urllib.request.urlopen(request).read()
 
     s = json.loads(response)
-    if s.has_key('error'):
+    if 'error' in s:
         raise ApiException(s['message'])
     return s
 

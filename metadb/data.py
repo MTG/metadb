@@ -1,12 +1,12 @@
 import logging
 import json
-import exceptions
+from . import exceptions
 import uuid
 from sqlalchemy.sql import text
 
-import db
+from . import db
 
-import exceptions
+from . import exceptions
 
 def add_source(name):
     query = text("""

@@ -1,0 +1,8 @@
+Fabric
+Flask
+Flask-SQLAlchemy
+Flask-UUID
+click
+discogs-client
+python-memcached
+spotipy

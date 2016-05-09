@@ -4,5 +4,6 @@ Flask-SQLAlchemy
 Flask-UUID
 click
 discogs-client
+psycopg2
 python-memcached
 spotipy

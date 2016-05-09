@@ -31,18 +31,20 @@ def load_source(name):
             return {"id": row.id, "name": row.name}
     return None
 
-def add_scraper(source, version, scraper):
+def add_scraper(source, module, version, description):
     query = text("""
-        INSERT INTO scraper (source_id, version, scraper)
-             VALUES (:source_id, :version, :scraper)
+        INSERT INTO scraper (source_id, module, version, description)
+             VALUES (:source_id, :module, :version, :description)
           RETURNING id
         """)
     with db.engine.begin() as connection:
         result = connection.execute(query, {"source_id": source["id"],
+                                            "module": module,
                                             "version": version,
-                                            "scraper": scraper})
+                                            "description": description})
         row = result.fetchone()
-        return {"id": row.id, "version": version, "scraper": scraper}
+        return {"id": row.id, "module": module,
+                "version": version, "description": description}
 
 def load_scrapers_for_source(source):
     query = text("""

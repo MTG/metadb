@@ -4,8 +4,10 @@ import subprocess
 import os
 import click
 import config
+import csv
 
 from metadb import db
+from metadb import data
 
 ADMIN_SQL_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'admin', 'sql')
 
@@ -101,6 +103,25 @@ def init_test_db(force=False):
 
     print("Done!")
 
+@cli.command()
+def fixtures():
+    db.init_db_engine(config.SQLALCHEMY_DATABASE_URI)
+
+    sources = os.path.join("fixtures", "sources")
+    with open(sources) as fp:
+        r = csv.DictReader(fp)
+        for line in r:
+            if not data.load_source(**line):
+                data.add_source(**line)
+
+    scrapers = os.path.join("fixtures", "scrapers")
+    with open(scrapers) as fp:
+        r = csv.DictReader(fp)
+        for line in r:
+            sname = line.pop("source")
+            source = data.load_source(sname)
+            line["source"] = source
+            data.add_scraper(**line)
 
 if __name__ == '__main__':
     cli()

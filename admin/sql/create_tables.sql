@@ -13,8 +13,10 @@ CREATE TABLE source (
 CREATE TABLE scraper (
   id          SERIAL,
   source_id   INTEGER NOT NULL, -- FK to source.id
-  version     TEXT,
-  description TEXT
+  module      TEXT, -- python module name
+  version     TEXT, -- anything
+  description TEXT, -- anything
+  added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE item (

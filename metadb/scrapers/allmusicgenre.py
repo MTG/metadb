@@ -19,20 +19,27 @@ def main():
     content = get_content()
     yaml.safe_dump(content, open("allmusic-genres.yaml", "w"), default_flow_style=False)
 
+def is_genre_tag(tag):
+    if tag.has_attr("class"):
+        cl = tag.attrs["class"]
+        if "genre-parent" in cl or "genre-links" in cl:
+            if tag.parent.parent.name == "ul" and "subgenres" in tag.parent.parent.attrs["class"]:
+                return True
+    return False
+
 def parse_genre(name, url):
     urlpart = url.replace("http://www.allmusic.com/", "")
     log.info("%s: %s", name, url)
     soup = query(urlpart)
-    subgenres = soup.find_all("ul", {"class": "subgenres"})
+    subgenres = soup.find_all(is_genre_tag)
 
     genre = {}
 
     for sub in subgenres:
-        title = sub.find("span", {"class": "genre-parent"})
-        if title:
-            title = title.text
-            styles = sub.find_all("a", {"class": "genre-links"})
-            style_names = [s.text for s in styles]
+        if sub:
+            title = sub.text.strip()
+            styles = sub.parent.find_all("a", {"class": "genre-links"})
+            style_names = [s.text.strip() for s in styles]
             genre[title] = style_names
 
     if not genre:
@@ -43,7 +50,7 @@ def parse_genre(name, url):
         if mappings:
             styles = mappings.find_all("a")
             for s in styles:
-                s = s.text
+                s = s.text.strip()
                 genre.append(s)
 
     return genre
@@ -53,7 +60,7 @@ def get_content():
     genres = soup.find_all("div", {"class": "genre"})
     genre_map = {}
     for g in genres:
-        genre_name = g.h2.a.text
+        genre_name = g.h2.a.text.strip()
         genre_url = g.h2.a.attrs["href"]
         genre_map[genre_name] = parse_genre(genre_name, genre_url)
 
@@ -80,7 +87,7 @@ def query(url):
 
     url = "http://www.allmusic.com/{}".format(url)
     r = requests.get(url, headers=headers, cookies=cookies)
-    soup = BeautifulSoup(r.content, "html.parser")
+    soup = BeautifulSoup(r.content, "html5lib")
     return soup
 
 if __name__ == "__main__":

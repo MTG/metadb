@@ -11,9 +11,9 @@ ALTER TABLE item
     REFERENCES scraper (id);
 
 ALTER TABLE item
-  ADD CONSTRAINT item_fk_mbids
+  ADD CONSTRAINT item_fk_recording
   FOREIGN KEY (mbid)
-    REFERENCES mbids (mbid);
+    REFERENCES recording (mbid);
 
 ALTER TABLE item_data
   ADD CONSTRAINT item_data_fk_item

@@ -1,6 +1,11 @@
 BEGIN;
 
-CREATE TABLE mbids (
+CREATE TABLE recording (
+  mbid        UUID NOT NULL,
+  added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE release (
   mbid        UUID NOT NULL,
   added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

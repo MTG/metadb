@@ -10,6 +10,22 @@ CREATE TABLE release (
   added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE TABLE release_group (
+  mbid            UUID NOT NULL,
+  recording_mbid  UUID NOT NULL,
+  title           TEXT,
+  artist_credit   TEXT,
+  earliest_date   TEXT,
+  added           TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE recording_meta (
+  mbid            UUID NOT NULL,
+  title           TEXT,
+  artist_credit   TEXT,
+  added           TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 CREATE TABLE source (
   id          SERIAL,
   name        TEXT

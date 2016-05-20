@@ -5,6 +5,8 @@ import csv
 import json
 import os.path
 
+from metadb import util
+
 
 def _get_module_by_path(modulepath):
     try:
@@ -14,7 +16,10 @@ def _get_module_by_path(modulepath):
         raise Exception("Cannot load module %s" % modulepath)
 
 
-def save(result, outfile):
+def save(result, modulepath, outfile):
+    outfile = os.path.join(modulepath, outfile)
+    dirname = os.path.dirname(outfile)
+    util.mkdir_p(dirname)
     with open(outfile, 'w') as f:
         json.dump(result, f)
 
@@ -22,25 +27,25 @@ def save(result, outfile):
 def process_file(module, filename, save=False):
     with open(filename) as csvfile:
         for query in csv.DictReader(csvfile):
-            if not 'module' in query:
+            if 'module' not in query:
                 query['module'] = module
-            if not 'save' in query:
+            if 'save' not in query:
                 query['save'] = save
 
 
-            if not 'year' in query:
+            if 'year' not in query:
                 query['year'] = None
-            if not 'artist' in query:
+            if 'artist' not in query:
                 query['artist'] = None
-            if not 'recording' in query:
+            if 'recording' not in query:
                 query['recording'] = None
-            if not 'mbid' in query:
+            if 'mbid' not in query:
                 query['mbid'] = None
 
             process(query)
 
 
-def process(query):  
+def process(query):
 
     if not 'module' in query or not query['module']:
         raise Exception("Missing module information for the query", json.dumps(query))
@@ -55,39 +60,39 @@ def process(query):
 
     if query['save']:
         # Check if result file already exists
-        outfile = query['mbid'] + '.json'
+        mbid = query['mbid']
+        outfile = os.path.join(mbid[:2], "{}.json".format(mbid))
         if os.path.exists(outfile):
-            print("File", outfile, "found, skipping query")
             return
+
     try:
-        result, result_type = module.scrape(query)
+        result = module.scrape(query)
     except Exception as e:
+        raise
         print(str(e))
         return
 
-    # Save empty results too
-    
-    #if not result:
-    #    return
-        
-    result = {
-                'type': result_type,
-                'mbid': query['mbid'],
-                'scraper': query['module'],
-                'result': result
-             }
+    result_type = result["type"]
+    data = result.get("data")
+    response = result.get("response")
+    if data:
+        result = {
+                    'type': result_type,
+                    'mbid': query['mbid'],
+                    'scraper': query['module'],
+                    'result': data
+                 }
+    elif response:
+        result = response
 
     if query['save']:
-        save(result, outfile)
+        save(result, query['module'], outfile)
     else:
-        print(result)
-        print()
+        print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description = """
-MetaDB metadata scraper.
-""")
+    parser = ArgumentParser(description = """MetaDB metadata scraper.""")
     parser.add_argument('--module', help='Scraper module python path, e.g. metadb.scrapers.lastfm', required=False)
     parser.add_argument('--csv', help='Use input csv file for queries', required=False)
     parser.add_argument('--artist', help='Artist name', required=False)
@@ -100,7 +105,7 @@ MetaDB metadata scraper.
     args = parser.parse_args()
 
     if args.csv:
-        if args.artist or args.recording or args.release or args.mbid: 
+        if args.artist or args.recording or args.release or args.mbid:
             print('Performing queries using data in ', args.csv, 'file; --artist/--recording/--release/--mbid flags will be ignored')
         process_file(args.module, args.csv, args.save)
 

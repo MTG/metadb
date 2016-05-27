@@ -2,6 +2,7 @@ Fabric
 Flask
 Flask-SQLAlchemy
 Flask-UUID
+beautifulsoup4
 click
 discogs-client
 psycopg2

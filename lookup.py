@@ -62,7 +62,7 @@ def process_file(module, filename, numworkers, save=False):
         process_items(items, module, save, numworkers)
         done += CHUNK_SIZE
         durdelta, remdelta = util.stats(done, total, starttime)
-        time.sleep(random.uniform(.5, 2))
+        time.sleep(random.uniform(.5, 1.5))
         log.info("Done %s/%s in %s; %s remaining", done, total, str(durdelta), str(remdelta))
 
 

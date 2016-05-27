@@ -6,4 +6,5 @@ click
 discogs-client
 psycopg2
 python-memcached
+requests
 spotipy

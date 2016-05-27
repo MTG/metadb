@@ -5,6 +5,7 @@ import csv
 import json
 import os.path
 import time
+import random
 import concurrent.futures
 
 from metadb import util
@@ -43,6 +44,7 @@ def process_items(items, module, save, numworkers):
             try:
                 result = future.result()
             except Exception as exc:
+                raise
                 print('%r generated an exception: %s' % (i, exc))
 
 def process_file(module, filename, numworkers, save=False):
@@ -54,12 +56,13 @@ def process_file(module, filename, numworkers, save=False):
     total = len(data)
     starttime = time.time()
     done = 0
-    CHUNK_SIZE = 100
+    CHUNK_SIZE = 1
 
     for items in util.chunks(data, CHUNK_SIZE):
         process_items(items, module, save, numworkers)
         done += CHUNK_SIZE
         durdelta, remdelta = util.stats(done, total, starttime)
+        time.sleep(random.uniform(.5, 2))
         log.info("Done %s/%s in %s; %s remaining", done, total, str(durdelta), str(remdelta))
 
 

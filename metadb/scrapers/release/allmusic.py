@@ -48,8 +48,9 @@ def scrape(query):
     data["album"] = {}
     if searchres:
         relres = get_first_release(searchres, year)
-        release = parse_release(relres)
-        data["album"] = release
+        if relres:
+            release = parse_release(relres)
+            data["album"] = release
 
     return {"type": TYPE, "data": data}
 
@@ -60,10 +61,12 @@ def get_first_release(data, year):
             if filtered:
                 data = filtered
         rel = data[0]
-        releaseurl = rel["albumdata"].get("href")
-        if releaseurl:
-            content = load_release(releaseurl)
-            return content
+        albumdata = rel["albumdata"]
+        if albumdata:
+            releaseurl = rel["albumdata"].get("href")
+            if releaseurl:
+                content = load_release(releaseurl)
+                return content
     return {}
 
 def parse_release(data):

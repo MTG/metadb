@@ -1,6 +1,5 @@
 import logging
 from logging.handlers import RotatingFileHandler, SMTPHandler
-from raven.contrib.flask import Sentry
 
 
 def init_loggers(app):
@@ -43,8 +42,9 @@ def _add_email_handler(app, level=logging.NOTSET):
 
 
 def _add_sentry(app, level=logging.NOTSET):
+    from raven.contrib.flask import Sentry
     """Adds support for error logging and aggregation using Sentry platform.
-    
+
     See https://docs.getsentry.com for more information about it.
     """
     Sentry(app, logging=True, level=level)

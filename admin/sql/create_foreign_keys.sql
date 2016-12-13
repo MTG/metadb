@@ -10,11 +10,6 @@ ALTER TABLE item
   FOREIGN KEY (scraper_id)
     REFERENCES scraper (id);
 
-ALTER TABLE item
-  ADD CONSTRAINT item_fk_recording
-  FOREIGN KEY (mbid)
-    REFERENCES recording (mbid);
-
 ALTER TABLE item_data
   ADD CONSTRAINT item_data_fk_item
   FOREIGN KEY (item_id)

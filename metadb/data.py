@@ -87,7 +87,16 @@ def load_latest_scraper_for_source(source):
                     "scraper": row.scraper}
     return None
 
+
 def add_item(scraper, mbid, request=None, response=None, data=None):
+    if response is None and data is None:
+        raise exceptions.BadDataException("Need either a response or data")
+
+    with db.engine.begin() as connection:
+        return _add_item_w_connection(connection, scraper, mbid, request, response, data)
+
+
+def _add_item_w_connection(connection, scraper, mbid, request=None, response=None, data=None):
     if response is None and data is None:
         raise exceptions.BadDataException("Need either a response or data")
 
@@ -101,17 +110,21 @@ def add_item(scraper, mbid, request=None, response=None, data=None):
         INSERT INTO item_data (item_id, data, request, response)
              VALUES (:item_id, :data, :request, :response)
         """)
-    with db.engine.begin() as connection:
-        result = connection.execute(item_query, {"scraper_id": scraper["id"],
-                                                 "mbid": mbid})
-        row = result.fetchone()
-        id = row.id
-        result = connection.execute(item_data_query, {"item_id": id,
-                                                      "data": json.dumps(data),
-                                                      "request": request,
-                                                      "response": response})
-        return {"id": id, "mbid": mbid, "scraper_id": scraper["id"],
-                "data": data, "request": request, "response": response}
+
+    result = connection.execute(item_query, {"scraper_id": scraper["id"],
+                                             "mbid": mbid})
+    row = result.fetchone()
+    id = row.id
+    if isinstance(data, dict):
+        data = json.dumps(data)
+    result = connection.execute(item_data_query, {"item_id": id,
+                                                  "data": data,
+                                                  "request": request,
+                                                  "response": response})
+
+    return {"id": id, "mbid": mbid, "scraper_id": scraper["id"],
+            "data": data, "request": request, "response": response}
+
 
 def load_item(mbid, source_name):
     source = load_source(source_name)

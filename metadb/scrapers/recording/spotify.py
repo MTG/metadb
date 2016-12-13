@@ -1,8 +1,10 @@
 import spotipy
 
+TYPE = "recording"
+
+sp = spotipy.Spotify()
+
 def get_artist(name):
-    sp = spotipy.Spotify()
-    sp.trace = False
     results = sp.search(q='artist:' + name, type='artist')
     items = results['artists']['items']
     if len(items) > 0:

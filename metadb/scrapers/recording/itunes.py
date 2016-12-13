@@ -7,7 +7,7 @@ TYPE = "recording"
 
 sess = requests.Session()
 adapter = HTTPAdapter(max_retries=5, pool_connections=100, pool_maxsize=100)
-sess.mount("https://itunes.apple.com.com", adapter)
+sess.mount("https://itunes.apple.com", adapter)
 
 
 def do_itunes_lookup(artist, title):

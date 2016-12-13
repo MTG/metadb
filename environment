@@ -1,0 +1,8 @@
+METADB_DEBUG=True
+
+METADB_REDIS_HOST=redis
+
+METADB_DB_URI=postgresql://metadb@db/metadb
+METADB_ADMIN_URI=postgresql://postgres@db/template1
+
+METADB_MUSICBRAINZ_DB_URI=postgresql://musicbrainz:@10.55.0.87/musicbrainz_db

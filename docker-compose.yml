@@ -1,0 +1,42 @@
+version: '2'
+volumes:
+  pgdata:
+services:
+  db:
+    image: postgres:9.6
+    volumes:
+      - pgdata:/var/lib/postgresql
+    ports:
+      - "5543:5432"
+  redis:
+    image: redis
+  web:
+    build: .
+    env_file:
+      - environment
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/code
+    command: python manage.py runserver
+    depends_on:
+      - db
+      - redis
+  celery:
+    build: .
+    env_file:
+      - environment
+    volumes_from:
+      - web
+    command: celery -A metadb.celery:celery worker --loglevel=info
+    depends_on:
+      - redis
+  flower:  #  Django app to monitor Celery status
+    build: ./docker/flower/
+    env_file:
+      - environment
+    command: flower --address=0.0.0.0 --port=5555 --broker=redis://redis
+    ports:
+      - "5555:5555"
+    depends_on:
+      - celery

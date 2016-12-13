@@ -4,8 +4,10 @@ Flask-SQLAlchemy
 Flask-UUID
 beautifulsoup4
 click
+celery
 discogs-client
 psycopg2
 python-memcached
+redis
 requests
 spotipy

@@ -1,0 +1,5 @@
+BEGIN;
+
+CREATE SCHEMA metadb;
+
+COMMIT;

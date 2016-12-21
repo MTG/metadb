@@ -49,6 +49,7 @@ def init_db(force):
     db.init_db_engine(config.SQLALCHEMY_DATABASE_URI)
 
     print('Creating tables...')
+    db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_schema.sql'))
     db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_tables.sql'))
 
     print('Creating primary and foreign keys...')
@@ -66,7 +67,7 @@ def init_db(force):
 def init_test_db(force=False):
     """Same as `init_db` command, but creates a database that will be used to run tests.
 
-    `TEST_SQLALCHEMY_DATABASE_URI` variable must be defined in the config file.
+    `SQLALCHEMY_TEST_URI` variable must be defined in the config file.
     """
 
     db.init_db_engine(config.SQLALCHEMY_ADMIN_URI)
@@ -82,8 +83,9 @@ def init_test_db(force=False):
         sys.exit(1)
     db.engine.dispose()
 
-    db.init_db_engine(config.TEST_SQLALCHEMY_DATABASE_URI)
+    db.init_db_engine(config.SQLALCHEMY_TEST_URI)
 
+    db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_schema.sql'))
     db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_tables.sql'))
     db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_primary_keys.sql'))
     db.run_sql_script(os.path.join(ADMIN_SQL_DIR, 'create_foreign_keys.sql'))

@@ -8,6 +8,53 @@ from . import db
 
 from . import exceptions
 
+def add_token(admin=False):
+    """ Add a new token to the database and return it
+        Arguments:
+          admin: True if this token has admin privileges
+    """
+    query = text("""
+        INSERT INTO token (token, admin)
+             VALUES (:token, :admin)""")
+    with db.engine.begin() as connection:
+        token = str(uuid.uuid4())
+        result = connection.execute(query, {"token": token, "admin": admin})
+        return token
+
+
+def remove_token(token):
+    query = text("""
+        DELETE FROM token
+              WHERE token = :token""")
+    with db.engine.begin() as connection:
+        connection.execute(query, {"token": token})
+
+
+def get_tokens():
+    query = text("""
+        SELECT token
+             , admin
+          FROM token
+      ORDER BY added""")
+    with db.engine.begin() as connection:
+        rows = connection.execute(query)
+        return [{"token": str(r["token"]), "admin": r["admin"]} for r in rows]
+
+
+def get_token(token):
+    query = text("""
+        SELECT token
+             , admin
+          FROM token
+         WHERE token = :token""")
+    with db.engine.begin() as connection:
+        result = connection.execute(query, {"token": token})
+        if result.rowcount:
+            return result.fetchone()
+        else:
+            return {}
+
+
 def add_source(name):
     query = text("""
         INSERT INTO source (name)

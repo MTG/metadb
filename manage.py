@@ -18,7 +18,7 @@ cli = click.Group()
 @cli.command()
 @click.option("--host", "-h", default="0.0.0.0", show_default=True)
 @click.option("--port", "-p", default=8080, show_default=True)
-def runserver(host, port, debug):
+def runserver(host, port):
     create_app().run(host=host, port=port)
 
 
@@ -110,6 +110,31 @@ def fixtures():
             source = data.load_source(sname)
             line["source"] = source
             data.add_scraper(**line)
+
+@cli.command()
+@click.option("--admin", is_flag=True, help="Set if this token is for an admin")
+def addtoken(admin):
+    db.init_db_engine(config.SQLALCHEMY_DATABASE_URI)
+
+    token = data.add_token(admin)
+    print("Added token: %s" % token)
+
+@cli.command()
+@click.argument("token")
+def rmtoken(token):
+    db.init_db_engine(config.SQLALCHEMY_DATABASE_URI)
+
+    data.remove_token(token)
+
+
+@cli.command()
+def lstokens():
+    db.init_db_engine(config.SQLALCHEMY_DATABASE_URI)
+
+    tokens = data.get_tokens()
+
+    for t in tokens:
+        print("%s admin=%s" % (t["token"], t["admin"]))
 
 if __name__ == '__main__':
     cli()

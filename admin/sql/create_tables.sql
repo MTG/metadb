@@ -5,14 +5,13 @@ CREATE TABLE recording (
   added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE TABLE release (
-  mbid        UUID NOT NULL,
-  added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE recording_release_group (
+  recording_id        UUID NOT NULL,
+  release_group_mbid  UUID NOT NULL
 );
 
 CREATE TABLE release_group (
   mbid            UUID NOT NULL,
-  recording_mbid  UUID NOT NULL,
   title           TEXT,
   artist_credit   TEXT,
   earliest_date   TEXT,
@@ -42,16 +41,20 @@ CREATE TABLE scraper (
 
 CREATE TABLE item (
   id          SERIAL,
-  mbid        UUID    NOT NULL,
+  mbid        UUID    NOT NULL, -- FK to recording.mbid or release_group.mbid
   scraper_id  INTEGER NOT NULL, -- FK to scraper.id
   added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE item_data (
   item_id     INTEGER  NOT NULL, -- FK to item.id
-  data        JSONB,
-  request     TEXT,
-  response    TEXT
+  data        JSONB
+);
+
+CREATE TABLE token (
+  token UUID    NOT NULL,
+  admin BOOLEAN DEFAULT 'f',
+  added         TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 COMMIT;

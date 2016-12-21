@@ -11,3 +11,4 @@ python-memcached
 redis
 requests
 spotipy
+uwsgi

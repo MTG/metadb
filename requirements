@@ -6,6 +6,8 @@ beautifulsoup4
 click
 celery
 discogs-client
+mbdata
+musicbrainzngs
 psycopg2
 python-memcached
 redis

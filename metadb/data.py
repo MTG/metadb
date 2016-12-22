@@ -35,13 +35,13 @@ def remove_token(token):
 
 def get_tokens():
     query = text("""
-        SELECT token
+        SELECT token::text
              , admin
           FROM token
       ORDER BY added""")
     with db.engine.begin() as connection:
         rows = connection.execute(query)
-        return [{"token": str(r["token"]), "admin": r["admin"]} for r in rows]
+        return [dict(r) for r in rows.fetchall()]
 
 
 def get_token(token):
@@ -50,15 +50,14 @@ def get_token(token):
     except ValueError:
         return {}
     query = text("""
-        SELECT token
+        SELECT token::text
              , admin
           FROM token
          WHERE token = :token""")
     with db.engine.begin() as connection:
         result = connection.execute(query, {"token": token})
         if result.rowcount:
-            r = result.fetchone()
-            return {"token": str(r["token"]), "admin": r["admin"]}
+            return dict(result.fetchone())
         else:
             return {}
 

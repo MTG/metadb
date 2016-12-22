@@ -23,6 +23,10 @@ def add_token(admin=False):
 
 
 def remove_token(token):
+    try:
+        uuid.UUID(token, version=4)
+    except ValueError:
+        return
     query = text("""
         DELETE FROM token
               WHERE token = :token""")
@@ -42,6 +46,10 @@ def get_tokens():
 
 
 def get_token(token):
+    try:
+        uuid.UUID(token, version=4)
+    except ValueError:
+        return {}
     query = text("""
         SELECT token
              , admin
@@ -50,7 +58,8 @@ def get_token(token):
     with db.engine.begin() as connection:
         result = connection.execute(query, {"token": token})
         if result.rowcount:
-            return result.fetchone()
+            r = result.fetchone()
+            return {"token": str(r["token"]), "admin": r["admin"]}
         else:
             return {}
 

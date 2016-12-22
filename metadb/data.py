@@ -1,12 +1,11 @@
-import logging
 import json
-from . import exceptions
 import uuid
+
 from sqlalchemy.sql import text
 
 from . import db
-
 from . import exceptions
+
 
 def add_token(admin=False):
     """ Add a new token to the database and return it
@@ -74,6 +73,38 @@ def add_source(name):
         id = result.fetchone()[0]
         return {"name": name, "id": id}
 
+
+def add_recording_mbids(mbids):
+    """ Add some recording musicbrainzids to the recording table.
+        Returns mbids which were added.
+    """
+    check_query = text("""
+        SELECT mbid
+          FROM recording
+         WHERE mbid = :mbid""")
+    insert_query = text("""
+        INSERT INTO recording (mbid)
+             VALUES (:mbid)""")
+    ret = []
+    with db.engine.begin() as connection:
+        for mbid in mbids:
+            result = connection.execute(check_query, {"mbid": mbid})
+            if not result.rowcount:
+                connection.execute(insert_query, {"mbid": mbid})
+                ret.append(mbid)
+    return ret
+
+
+def get_recording_mbids():
+    query = text("""
+        SELECT mbid::text
+          FROM recording
+      ORDER BY added""")
+    with db.engine.begin() as connection:
+        result = connection.execute(query)
+        return [dict(r) for r in result.fetchall()]
+
+
 def load_source(name):
     query = text("""
         SELECT id
@@ -86,6 +117,7 @@ def load_source(name):
         if row:
             return {"id": row.id, "name": row.name}
     return None
+
 
 def add_scraper(source, module, version, description):
     query = text("""
@@ -101,6 +133,7 @@ def add_scraper(source, module, version, description):
         row = result.fetchone()
         return {"id": row.id, "module": module,
                 "version": version, "description": description}
+
 
 def load_scrapers_for_source(source):
     query = text("""
@@ -121,6 +154,7 @@ def load_scrapers_for_source(source):
                     "version": r.version,
                     "scraper": r.scraper})
         return ret
+
 
 def load_latest_scraper_for_source(source):
     query = text("""
@@ -173,10 +207,10 @@ def _add_item_w_connection(connection, scraper, mbid, request=None, response=Non
     id = row.id
     if isinstance(data, dict):
         data = json.dumps(data)
-    result = connection.execute(item_data_query, {"item_id": id,
-                                                  "data": data,
-                                                  "request": request,
-                                                  "response": response})
+    connection.execute(item_data_query, {"item_id": id,
+                                         "data": data,
+                                         "request": request,
+                                         "response": response})
 
     return {"id": id, "mbid": mbid, "scraper_id": scraper["id"],
             "data": data, "request": request, "response": response}

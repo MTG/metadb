@@ -1,12 +1,32 @@
-from __future__ import absolute_import
-from flask import Blueprint, jsonify
+import uuid
+
+from flask import request, Blueprint, jsonify
 
 import metadb
 import metadb.data
-
 import webserver.exceptions
+import webserver.decorators
 
 api_bp = Blueprint('api', __name__)
+
+
+@api_bp.route("/recordings", methods=["POST"])
+@webserver.decorators.admin_required
+def submit_recordings():
+    data = request.get_json()
+    if not isinstance(data, list):
+        raise webserver.exceptions.APIBadRequest("Submitted data must be a list")
+    newdata = []
+    for d in data:
+        try:
+            uuid.UUID(str(d), version=4)
+            newdata.append(d)
+        except ValueError:
+            pass
+
+    metadb.data.add_recording_mbids(newdata)
+    return jsonify({})
+
 
 @api_bp.route("/<uuid:mbid>/<source_name>")
 def load(mbid, source_name):

@@ -2,7 +2,41 @@ from functools import update_wrapper, wraps
 from datetime import timedelta
 from flask import request, current_app, make_response
 from six import string_types
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Unauthorized
+
+from metadb import data
+
+
+def _get_token_from_header(header):
+    token = {}
+    if header:
+        parts = header.split(" ")
+        if len(parts) == 2 and parts[0] == "Token":
+            token = data.get_token(parts[1])
+    return token
+
+
+def auth_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.headers.get("Authorization")
+        token = _get_token_from_header(auth)
+        if token:
+            return f(*args, **kwargs)
+        raise Unauthorized
+    return decorated
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.headers.get("Authorization")
+        token = _get_token_from_header(auth)
+        if token and token["admin"]:
+            return f(*args, **kwargs)
+        raise Unauthorized
+
+    return decorated
 
 
 def crossdomain(origin='*', methods=None, headers=None,

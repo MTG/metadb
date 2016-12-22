@@ -1,6 +1,5 @@
 
 from webserver import create_app
-import subprocess
 import os
 import click
 import config

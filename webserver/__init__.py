@@ -1,4 +1,4 @@
-from flask import Flask, g
+from flask import Flask
 from metadb import db
 import sys
 import os

@@ -8,6 +8,13 @@ engine = create_engine(config.MUSICBRAINZ_DATABASE_URI) #, echo=True)
 Session = sessionmaker(bind=engine)
 
 TYPE = "recording"
+s = None
+
+
+def config():
+    global s
+    s = Session()
+
 
 def load_recording(session, recordingid):
     rec = session.query(models.Recording).filter_by(gid=recordingid).first()
@@ -93,13 +100,11 @@ def format_releases(session, releases, rec_artists):
             "tags": tags,
             })
 
-
     return all_releases, rec_artists, release_groups
 
 
 def format_release_groups(session, rgs, rec_artists):
     all_release_groups = {}
-
 
     for rg in rgs:
         tags = release_group_tags(session, rg)
@@ -130,7 +135,7 @@ def format_artists(session, artists):
 
 def scrape(query):
     mbid = query['mbid']
-    session = query['session']
+    session = s
 
     rec = load_recording(session, mbid)
     rec_artists = set()

@@ -1,5 +1,7 @@
 import musicbrainzngs as mb
 
+import operator
+
 import os
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -7,6 +9,12 @@ logging.basicConfig(level=logging.DEBUG)
 TYPE = "recording"
 
 MB_HOST_MBDOTORG = "musicbrainz.org"
+
+
+def sort_tags(tags):
+    # Tags from webservice are strings, let's make them all integer
+    tags = [{"name": t["name"], "count": int(t["count"])} for t in tags]
+    return sorted(tags, key=operator.itemgetter("name"))
 
 
 def config():
@@ -63,17 +71,21 @@ def get_metadata_for_releases(releases):
             release_dates = [re["date"] for re in mbrel.get("release-event-list", []) if "date" in re]
             release_artists, _ = artist_credits_to_artist_list(mbrel["artist-credit"])
             artists.update(release_artists)
-            release_map[r] = {"artist_credit": mbrel["artist-credit-phrase"], "artists": release_artists,
-                              "id": r, "name": mbrel["title"], "release_dates": release_dates,
-                              "release_group": rg["id"], "tags": mbrel.get("tag-list", [])}
+            release_map[r] = {"artist_credit": mbrel["artist-credit-phrase"],
+                              "artists": sorted(release_artists),
+                              "id": r,
+                              "name": mbrel["title"],
+                              "release_dates": sorted(release_dates),
+                              "release_group": rg["id"],
+                              "tags": sort_tags(mbrel.get("tag-list", []))}
 
         if rg["id"] not in release_group_map:
             rg_artists, _ = artist_credits_to_artist_list(rg["artist-credit"])
             artists.update(rg_artists)
             release_group_map[rg["id"]] = {"artist_credit": rg["artist-credit-phrase"],
-                                           "artists": rg_artists,
+                                           "artists": sorted(rg_artists),
                                            "first_release_date": rg.get("first-release-date"),
-                                           "name": rg["title"], "tags": rg.get("tag-list", [])}
+                                           "name": rg["title"], "tags": sort_tags(rg.get("tag-list", []))}
 
     return artists, release_map, release_group_map
 
@@ -88,7 +100,7 @@ def artist_credits_to_artist_list(credits):
             # Recording artist info
             artist_id = item["artist"]["id"]
             artist_name = item["artist"]["name"]
-            tags = item["artist"].get("tag-list", [])
+            tags = sort_tags(item["artist"].get("tag-list", []))
 
             artists.add(artist_id)
             if artist_id not in artist_map:
@@ -101,7 +113,7 @@ def lookup_artists(artists):
     artist_map = {}
     for a in artists:
         mba = mb.get_artist_by_id(a, includes=["tags"])["artist"]
-        artist_map[a] = {"name": mba["name"], "tags": mba.get("tag-list", [])}
+        artist_map[a] = {"name": mba["name"], "tags": sort_tags(mba.get("tag-list", []))}
     return artist_map
 
 
@@ -112,11 +124,11 @@ def scrape(query):
 
     artists, artist_map = artist_credits_to_artist_list(recording["artist-credit"])
 
-    data = {}
-    data["name"] = recording["title"]
-    data["artist_credit"] = recording["artist-credit-phrase"]
-    data["tags"] = recording.get("tag-list", [])
-    data["artists"] = artists
+    data = {
+        "name": recording["title"],
+        "artist_credit": recording["artist-credit-phrase"],
+        "tags": sort_tags(recording.get("tag-list", [])),
+        "artists": sorted(artists)}
 
     # Get release names + tags + artists + release groups
     release_ids = get_releases_for_recording(mbid)
@@ -130,7 +142,7 @@ def scrape(query):
 
     data["artist_map"] = artist_map
 
-    data["releases"] = release_ids
+    data["releases"] = sorted(release_ids)
     data["release_map"] = release_map
     data["release_group_map"] = release_group_map
 

@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE TABLE recording (
   mbid        UUID NOT NULL,
   added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -56,5 +54,3 @@ CREATE TABLE token (
   admin BOOLEAN DEFAULT 'f',
   added         TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-
-COMMIT;

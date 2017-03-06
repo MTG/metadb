@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.pool import NullPool
 import sqlalchemy.exc
 
+
 engine = None
 
 
@@ -13,9 +14,8 @@ def init_db_engine(connect_str):
 def run_sql_script(sql_file_path, notransaction=False):
     """ Execute the contents of a SQL script with the current engine. """
     with open(sql_file_path) as sql:
-        connection = engine.connect()
-        connection.execute(sql.read())
-        connection.close()
+        with engine.connect() as connection:
+            connection.execute(sql.read())
 
 
 def run_sql_script_without_transaction(sql_file_path):

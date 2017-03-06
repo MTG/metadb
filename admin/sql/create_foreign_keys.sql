@@ -1,5 +1,3 @@
-BEGIN;
-
 ALTER TABLE scraper
   ADD CONSTRAINT scraper_fk_source
   FOREIGN KEY (source_id)
@@ -14,5 +12,3 @@ ALTER TABLE item_data
   ADD CONSTRAINT item_data_fk_item
   FOREIGN KEY (item_id)
     REFERENCES item (id);
-
-COMMIT;

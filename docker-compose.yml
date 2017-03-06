@@ -1,6 +1,7 @@
 version: '2'
 volumes:
   pgdata:
+  ipython:
 services:
   db:
     image: postgres:9.6
@@ -18,6 +19,7 @@ services:
       - "8080:8080"
     volumes:
       - .:/code
+      - ipython:/root/.ipython
     command: python manage.py runserver
     depends_on:
       - db

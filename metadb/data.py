@@ -138,8 +138,8 @@ def load_scrapers_for_source(source):
     query = text("""
         SELECT id
              , source_id
+             , module
              , version
-             , scraper
           FROM scraper
          WHERE source_id = :source_id
         """)
@@ -149,9 +149,9 @@ def load_scrapers_for_source(source):
         ret = []
         for r in rows:
             ret.append({"id": r.id,
-                    "source_id": r.source_id,
-                    "version": r.version,
-                    "scraper": r.scraper})
+                        "source_id": r.source_id,
+                        "version": r.version,
+                        "module": r.module})
         return ret
 
 
@@ -177,18 +177,12 @@ def load_latest_scraper_for_source(source):
     return None
 
 
-def add_item(scraper, mbid, request=None, response=None, data=None):
-    if response is None and data is None:
-        raise exceptions.BadDataException("Need either a response or data")
-
+def add_item(scraper, mbid, data):
     with db.engine.begin() as connection:
-        return _add_item_w_connection(connection, scraper, mbid, request, response, data)
+        return _add_item_w_connection(connection, scraper, mbid, data)
 
 
-def _add_item_w_connection(connection, scraper, mbid, request=None, response=None, data=None):
-    if response is None and data is None:
-        raise exceptions.BadDataException("Need either a response or data")
-
+def _add_item_w_connection(connection, scraper, mbid, data):
     item_query = text("""
         INSERT INTO item (scraper_id, mbid)
              VALUES (:scraper_id, :mbid)
@@ -196,8 +190,8 @@ def _add_item_w_connection(connection, scraper, mbid, request=None, response=Non
         """)
 
     item_data_query = text("""
-        INSERT INTO item_data (item_id, data, request, response)
-             VALUES (:item_id, :data, :request, :response)
+        INSERT INTO item_data (item_id, data)
+             VALUES (:item_id, :data)
         """)
 
     result = connection.execute(item_query, {"scraper_id": scraper["id"],
@@ -207,12 +201,10 @@ def _add_item_w_connection(connection, scraper, mbid, request=None, response=Non
     if isinstance(data, dict):
         data = json.dumps(data)
     connection.execute(item_data_query, {"item_id": id,
-                                         "data": data,
-                                         "request": request,
-                                         "response": response})
+                                         "data": data})
 
     return {"id": id, "mbid": mbid, "scraper_id": scraper["id"],
-            "data": data, "request": request, "response": response}
+            "data": data}
 
 
 def load_item(mbid, source_name):
@@ -222,9 +214,7 @@ def load_item(mbid, source_name):
         SELECT item.id,
                item.mbid,
                item.added,
-               item_data.data,
-               item_data.request,
-               item_data.response
+               item_data.data
           FROM item
      LEFT JOIN item_data
             ON item_data.item_id = item.id
@@ -237,7 +227,7 @@ def load_item(mbid, source_name):
         row = result.fetchone()
         if row:
             return {"id": row.id, "mbid": row.mbid, "added": row.added,
-                    "data": row.data, "request": row.request, "response": row.response}
+                    "data": row.data}
 
     return None
 

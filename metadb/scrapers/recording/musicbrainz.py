@@ -17,6 +17,6 @@ def scrape(query):
     db = os.getenv("METADB_MUSICBRAINZ_DB_URI")
     # If database config, use db. else ws
     if db:
-        musicbrainzdb.scrape(query)
+        return musicbrainzdb.scrape(query)
     else:
-        musicbrainzws.scrape(query)
+        return musicbrainzws.scrape(query)

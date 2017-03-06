@@ -146,4 +146,4 @@ def scrape(query):
     data["release_map"] = release_map
     data["release_group_map"] = release_group_map
 
-    return data, TYPE
+    return data

@@ -30,7 +30,7 @@ services:
       - environment
     volumes_from:
       - web
-    command: celery -A metadb.celery:celery worker --loglevel=info
+    command: celery -A metadb.jobs:celery worker --loglevel=info
     depends_on:
       - redis
   flower:  #  Django app to monitor Celery status

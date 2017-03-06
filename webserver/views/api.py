@@ -7,8 +7,9 @@ import metadb.data
 import webserver.exceptions
 import webserver.decorators
 
-api_bp = Blueprint('api', __name__)
+import metadb.jobs
 
+api_bp = Blueprint('api', __name__)
 
 @api_bp.route("/recordings", methods=["POST"])
 @webserver.decorators.admin_required
@@ -24,7 +25,9 @@ def submit_recordings():
         except ValueError:
             pass
 
-    metadb.data.add_recording_mbids(newdata)
+    added = metadb.data.add_recording_mbids(newdata)
+    for a in added:
+        metadb.jobs.scrape_musicbrainz.delay(a)
     return jsonify({})
 
 

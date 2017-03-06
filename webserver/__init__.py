@@ -4,7 +4,13 @@ import sys
 import os
 
 
-def create_app():
+def create_app(web=True):
+    """ Create the flask app
+
+    :param web: If True, this app is for the webserver, and should load blueprints and templating.
+                Set to False for celery
+    :return: the flask app
+    """
     app = Flask(__name__)
 
     # Configuration
@@ -20,21 +26,22 @@ def create_app():
     from flask_uuid import FlaskUUID
     FlaskUUID(app)
 
-    # Error handling
-    from webserver.errors import init_error_handlers
-    init_error_handlers(app)
+    if web:
+        # Error handling
+        from webserver.errors import init_error_handlers
+        init_error_handlers(app)
 
-    # Template utilities
-    app.jinja_env.add_extension('jinja2.ext.do')
-    from webserver import utils
-    app.jinja_env.filters['date'] = utils.reformat_date
-    app.jinja_env.filters['datetime'] = utils.reformat_datetime
+        # Template utilities
+        app.jinja_env.add_extension('jinja2.ext.do')
+        from webserver import utils
+        app.jinja_env.filters['date'] = utils.reformat_date
+        app.jinja_env.filters['datetime'] = utils.reformat_datetime
 
-    # Blueprints
-    from webserver.views.index import index_bp
-    from webserver.views.api import api_bp
-    app.register_blueprint(index_bp)
-    app.register_blueprint(api_bp)
+        # Blueprints
+        from webserver.views.index import index_bp
+        from webserver.views.api import api_bp
+        app.register_blueprint(index_bp)
+        app.register_blueprint(api_bp)
 
     @app.before_request
     def before_request():

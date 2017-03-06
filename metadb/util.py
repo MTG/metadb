@@ -3,10 +3,12 @@ import errno
 import time
 import datetime
 
+
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
         yield l[i:i+n]
+
 
 def mkdir_p(path):
     try:
@@ -16,6 +18,7 @@ def mkdir_p(path):
             pass
         else:
             raise
+
 
 def stats(done, total, starttime):
     nowtime = time.time()

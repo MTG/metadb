@@ -9,8 +9,8 @@ discogs-client
 mbdata
 musicbrainzngs
 psycopg2
-python-memcached
 redis
 requests
 spotipy
 uwsgi
+raven[flask]

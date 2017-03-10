@@ -26,11 +26,11 @@ def create_app(web=True):
     from flask_uuid import FlaskUUID
     FlaskUUID(app)
 
-    if web:
-        # Error handling
-        from webserver.errors import init_error_handlers
-        init_error_handlers(app)
+    # Error handling
+    from webserver.errors import init_error_handlers
+    init_error_handlers(app)
 
+    if web:
         # Template utilities
         app.jinja_env.add_extension('jinja2.ext.do')
         from webserver import utils

@@ -1,6 +1,7 @@
 import config
 
 import operator
+import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -104,9 +105,16 @@ def format_releases(session, releases, rec_artists):
         for acn in r.artist_credit.artists:
             rec_artists.add(acn.artist)
 
+        lu = r.last_updated
+        if lu:
+            lu = lu.isoformat()
+        else:
+            lu = datetime.datetime.utcnow().isoformat()
+
         all_releases[r.gid] = {
             "name": r.name,
-            "id": r.gid,
+            "mbid": r.gid,
+            "last_updated": lu,
             "release_group": r.release_group.gid,
             "release_dates": sorted(release_dates),
             "artist_credit": ac,
@@ -131,8 +139,16 @@ def format_release_groups(session, rgs, rec_artists):
         if not first_release_date:
             first_release_date = ""
 
+        lu = rg.last_updated
+        if lu:
+            lu = lu.isoformat()
+        else:
+            lu = datetime.datetime.utcnow().isoformat()
+
         all_release_groups[rg.gid] = {
+                "mbid": rg.gid,
                 "name": rg.name,
+                "last_updated": lu,
                 "first_release_date": first_release_date,
                 "artist_credit": ac,
                 "artists": sorted(artists),
@@ -174,7 +190,14 @@ def scrape(query):
         all_release_groups, rec_artists = format_release_groups(session, release_groups, rec_artists)
         all_artists = format_artists(session, list(rec_artists))
 
+        data["mbid"] = rec.gid
         data["name"] = rec.name
+        lu = rec.last_updated
+        if lu:
+            lu = lu.isoformat()
+        else:
+            lu = datetime.datetime.utcnow().isoformat()
+        data["last_updated"] = lu
         data["artist_credit"] = ac
         data["artists"] = sorted(artists)
         data["tags"] = sort_tags(tags)

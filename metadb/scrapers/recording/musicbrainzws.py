@@ -1,6 +1,7 @@
 import musicbrainzngs as mb
 
 import operator
+import datetime
 
 import os
 import logging
@@ -58,7 +59,7 @@ def get_releases_for_recording(recording_id):
     return release_ids
 
 
-def get_metadata_for_releases(releases):
+def get_metadata_for_releases(releases, now):
     artists = set()
     release_map = {}
     release_group_map = {}
@@ -73,7 +74,8 @@ def get_metadata_for_releases(releases):
             artists.update(release_artists)
             release_map[r] = {"artist_credit": mbrel["artist-credit-phrase"],
                               "artists": sorted(release_artists),
-                              "id": r,
+                              "id": mbrel["id"],
+                              "last_updated": now,
                               "name": mbrel["title"],
                               "release_dates": sorted(release_dates),
                               "release_group": rg["id"],
@@ -84,6 +86,8 @@ def get_metadata_for_releases(releases):
             artists.update(rg_artists)
             release_group_map[rg["id"]] = {"artist_credit": rg["artist-credit-phrase"],
                                            "artists": sorted(rg_artists),
+                                           "id": rg["id"],
+                                           "last_updated": now,
                                            "first_release_date": rg.get("first-release-date"),
                                            "name": rg["title"], "tags": sort_tags(rg.get("tag-list", []))}
 
@@ -119,20 +123,23 @@ def lookup_artists(artists):
 
 def scrape(query):
     mbid = query["mbid"]
+    now = datetime.datetime.utcnow().isoformat()
 
     recording = mb.get_recording_by_id(mbid, includes=["artists", "tags"])["recording"]
 
     artists, artist_map = artist_credits_to_artist_list(recording["artist-credit"])
 
     data = {
+        "mbid": recording["id"],
         "name": recording["title"],
         "artist_credit": recording["artist-credit-phrase"],
         "tags": sort_tags(recording.get("tag-list", [])),
-        "artists": sorted(artists)}
+        "artists": sorted(artists),
+        "last_updated": now}
 
     # Get release names + tags + artists + release groups
     release_ids = get_releases_for_recording(mbid)
-    other_artists, release_map, release_group_map = get_metadata_for_releases(release_ids)
+    other_artists, release_map, release_group_map = get_metadata_for_releases(release_ids, now)
 
     # For any artists in `other_artists` which are not in `artists`, look them up
     remaining_artists = list(set(other_artists) - set(artists))

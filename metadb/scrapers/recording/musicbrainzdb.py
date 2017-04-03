@@ -2,6 +2,7 @@ import config
 
 import operator
 import datetime
+import pytz
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -84,7 +85,7 @@ def format_date(part_date):
     return "-".join(parts)
 
 
-def format_releases(session, releases, rec_artists):
+def format_releases(session, releases, rec_artists, now):
     release_groups = set()
 
     all_releases = {}
@@ -106,10 +107,8 @@ def format_releases(session, releases, rec_artists):
             rec_artists.add(acn.artist)
 
         lu = r.last_updated
-        if lu:
-            lu = lu.isoformat()
-        else:
-            lu = datetime.datetime.utcnow().isoformat()
+        if not lu:
+            lu = now
 
         all_releases[r.gid] = {
             "name": r.name,
@@ -125,7 +124,7 @@ def format_releases(session, releases, rec_artists):
     return all_releases, rec_artists, release_groups
 
 
-def format_release_groups(session, rgs, rec_artists):
+def format_release_groups(session, rgs, rec_artists, now):
     all_release_groups = {}
 
     for rg in rgs:
@@ -140,10 +139,8 @@ def format_release_groups(session, rgs, rec_artists):
             first_release_date = ""
 
         lu = rg.last_updated
-        if lu:
-            lu = lu.isoformat()
-        else:
-            lu = datetime.datetime.utcnow().isoformat()
+        if not lu:
+            lu = now
 
         all_release_groups[rg.gid] = {
                 "mbid": rg.gid,
@@ -169,6 +166,8 @@ def format_artists(session, artists):
 
 def scrape(query):
     mbid = query['mbid']
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+
     session = s
 
     rec = load_recording(session, mbid)
@@ -186,17 +185,15 @@ def scrape(query):
         for r in releases:
             track_releases.append(r.gid)
 
-        all_releases, rec_artists, release_groups = format_releases(session, releases, rec_artists)
-        all_release_groups, rec_artists = format_release_groups(session, release_groups, rec_artists)
+        all_releases, rec_artists, release_groups = format_releases(session, releases, rec_artists, now)
+        all_release_groups, rec_artists = format_release_groups(session, release_groups, rec_artists, now)
         all_artists = format_artists(session, list(rec_artists))
 
         data["mbid"] = rec.gid
         data["name"] = rec.name
         lu = rec.last_updated
-        if lu:
-            lu = lu.isoformat()
-        else:
-            lu = datetime.datetime.utcnow().isoformat()
+        if not lu:
+            lu = now
         data["last_updated"] = lu
         data["artist_credit"] = ac
         data["artists"] = sorted(artists)

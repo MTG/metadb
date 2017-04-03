@@ -10,4 +10,6 @@ ADD pip.conf /etc/pip.conf
 
 ADD requirements.lock /code/
 RUN pip install -r requirements.lock
+ADD requirements_dev /code/
+RUN pip install  -r requirements_dev
 ADD . /code/

@@ -6,10 +6,12 @@ SECRET_KEY = "CHANGE_ME"
 # DATABASES
 
 # Primary database
-SQLALCHEMY_DATABASE_URI = "postgresql://metadb@/metadb"
+SQLALCHEMY_DATABASE_URI = "postgresql://metadb@db/metadb"
+
+SQLALCHEMY_ADMIN_URI = "postgresql://postgres@db/template1"
 
 # Database for testing
-TEST_SQLALCHEMY_DATABASE_URI = "postgresql://mdb_test@/mdb_test"
+TEST_SQLALCHEMY_DATABASE_URI = "postgresql://mdb_test@db/mdb_test"
 
 # The name of a postgres user who has superuser privileges. Your local user should
 # be able to connect to the database with this user.

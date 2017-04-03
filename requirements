@@ -5,6 +5,7 @@ Flask-UUID
 beautifulsoup4
 click
 celery
+dateparser
 discogs-client
 mbdata
 musicbrainzngs

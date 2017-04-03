@@ -2,6 +2,7 @@ import musicbrainzngs as mb
 
 import operator
 import datetime
+import pytz
 
 import os
 import logging
@@ -123,9 +124,17 @@ def lookup_artists(artists):
 
 def scrape(query):
     mbid = query["mbid"]
-    now = datetime.datetime.utcnow().isoformat()
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
 
-    recording = mb.get_recording_by_id(mbid, includes=["artists", "tags"])["recording"]
+    try:
+        recording = mb.get_recording_by_id(mbid, includes=["artists", "tags"])["recording"]
+    except mb.ResponseError as e:
+        # If this recording doesn't exist, return no data, otherwise reraise so that we
+        # can try and re-process it later (e.g. if we had a timeout)
+        if e.cause.code == 404:
+            return {}
+        else:
+            raise
 
     artists, artist_map = artist_credits_to_artist_list(recording["artist-credit"])
 

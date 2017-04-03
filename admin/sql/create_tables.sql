@@ -1,26 +1,30 @@
 CREATE TABLE recording (
-  mbid        UUID NOT NULL,
-  added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  mbid          UUID NOT NULL,
+  added         TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE recording_release_group (
-  recording_id        UUID NOT NULL,
+  recording_mbid      UUID NOT NULL,
   release_group_mbid  UUID NOT NULL
 );
 
 CREATE TABLE release_group (
-  mbid            UUID NOT NULL,
-  title           TEXT,
-  artist_credit   TEXT,
-  earliest_date   TEXT,
-  added           TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  mbid            UUID NOT NULL
+);
+
+CREATE TABLE release_group_meta (
+  mbid               UUID NOT NULL,
+  name               TEXT,
+  artist_credit      TEXT,
+  first_release_date TEXT,
+  last_updated       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE recording_meta (
   mbid            UUID NOT NULL,
-  title           TEXT,
+  name            TEXT,
   artist_credit   TEXT,
-  added           TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  last_updated    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE source (

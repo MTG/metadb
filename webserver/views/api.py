@@ -11,6 +11,7 @@ import metadb.jobs
 
 api_bp = Blueprint('api', __name__)
 
+
 @api_bp.route("/recordings", methods=["POST"])
 @webserver.decorators.admin_required
 def submit_recordings():
@@ -28,6 +29,23 @@ def submit_recordings():
     added = metadb.data.add_recording_mbids(newdata)
     for a in added:
         metadb.jobs.scrape_musicbrainz.delay(a)
+    return jsonify({})
+
+
+@api_bp.route("/lookup_meta", methods=["POST"])
+@api_bp.route("/lookup_meta/<uuid:mbid>", methods=["POST"])
+@webserver.decorators.admin_required
+def lookup_metadata(mbid=None):
+    """Force a lookup of metadata for recordings which are added but not in
+       the musicbrainz metadata tables."""
+
+    if mbid:
+        metadb.jobs.scrape_musicbrainz.delay(m)
+    else:
+        missing = metadb.data.get_recordings_missing_meta()
+        for m in missing:
+            metadb.jobs.scrape_musicbrainz.delay(m)
+
     return jsonify({})
 
 

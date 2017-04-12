@@ -208,6 +208,18 @@ def _add_item_w_connection(connection, scraper, mbid, data):
             "data": data}
 
 
+def get_recordings_missing_meta():
+    query = text("""
+        SELECT recording.mbid::text
+          FROM recording
+     LEFT JOIN recording_meta
+         USING (mbid)
+         WHERE recording_meta.mbid IS NULL""")
+    with db.engine.begin() as connection:
+        result = connection.execute(query)
+        return [r[0] for r in result.fetchall()]
+
+
 def load_item(mbid, source_name):
     source = load_source(source_name)
     scraper = load_latest_scraper_for_source(source)

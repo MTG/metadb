@@ -1,7 +1,7 @@
 import json
 import uuid
 import pytz
-import dateparser
+import datetime
 
 from sqlalchemy.sql import text
 
@@ -183,6 +183,13 @@ def add_item(scraper, mbid, data):
         return _add_item_w_connection(connection, scraper, mbid, data)
 
 
+class JsonDateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        return json.JSONEncoder.default(self, obj)
+
+
 def _add_item_w_connection(connection, scraper, mbid, data):
     item_query = text("""
         INSERT INTO item (scraper_id, mbid)
@@ -200,7 +207,7 @@ def _add_item_w_connection(connection, scraper, mbid, data):
     row = result.fetchone()
     id = row.id
     if isinstance(data, dict):
-        data = json.dumps(data)
+        data = json.dumps(data, cls=JsonDateTimeEncoder)
     connection.execute(item_data_query, {"item_id": id,
                                          "data": data})
 

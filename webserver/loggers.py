@@ -20,8 +20,11 @@ def _add_file_handler(app, filename, max_bytes=512 * 1024, backup_count=100,
 
 def _add_sentry(app, level=logging.NOTSET):
     from raven.contrib.flask import Sentry
+    from raven import Client
+    from raven.transport.requests import RequestsHTTPTransport
     """Adds support for error logging and aggregation using Sentry platform.
 
     See https://docs.getsentry.com for more information about it.
     """
-    Sentry(app, logging=True, level=level)
+    client = Client(app.config["SENTRY_DSN"], transport=RequestsHTTPTransport)
+    Sentry(app, client=client, logging=True, level=level)

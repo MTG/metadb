@@ -32,6 +32,10 @@ def config():
         mb.set_rate_limit(False)
 
 
+def dispose():
+    pass
+
+
 def get_releases_for_recording(recording_id):
     # Because there may be more than 25 releases for a recording, we should use
     # the browse methods

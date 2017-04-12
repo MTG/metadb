@@ -47,3 +47,4 @@ def scrape_musicbrainz(recording_mbid):
             if result:
                 data.add_item(s, recording_mbid, data=result)
                 data.cache_musicbrainz_metadata(result)
+            s_obj.dispose()

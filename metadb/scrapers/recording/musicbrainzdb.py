@@ -6,9 +6,10 @@ import pytz
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 from mbdata import models
 
-engine = create_engine(config.MUSICBRAINZ_DATABASE_URI) #, echo=True)
+engine = create_engine(config.MUSICBRAINZ_DATABASE_URI, poolclass=NullPool) #, echo=True)
 Session = sessionmaker(bind=engine)
 
 TYPE = "recording"
@@ -24,6 +25,11 @@ def sort_tags(tags):
 def config():
     global s
     s = Session()
+
+
+def dispose():
+    s.close()
+    engine.dispose()
 
 
 def load_recording(session, recordingid):

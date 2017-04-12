@@ -47,8 +47,8 @@ def create_app(web=True):
     def before_request():
         db.init_db_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 
-    @app.teardown_request
-    def teardown_request(exception):
-        pass
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db.engine.dispose()
 
     return app

@@ -32,3 +32,13 @@ ALTER TABLE release_group_meta
   ADD CONSTRAINT release_group_meta_fk_release_group
   FOREIGN KEY (mbid)
     REFERENCES release_group (mbid);
+
+ALTER TABLE recording_redirect
+  ADD CONSTRAINT recording_redirect_recording_mbid
+  FOREIGN KEY (mbid)
+    REFERENCES recording (mbid);
+
+ALTER TABLE recording_redirect
+  ADD CONSTRAINT recording_redirect_recording_new_mbid
+  FOREIGN KEY (new_mbid)
+    REFERENCES recording (mbid);

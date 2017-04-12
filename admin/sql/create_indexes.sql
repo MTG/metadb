@@ -9,3 +9,5 @@ CREATE INDEX item_data_ndx_item_id ON item_data (item_id);
 
 CREATE INDEX recording_release_group_ndx_recording_mbid ON recording_release_group (recording_mbid);
 CREATE INDEX recording_release_group_ndx_release_group_mbid ON recording_release_group (release_group_mbid);
+
+CREATE INDEX recording_redirect_mbid_pair ON recording_redirect (mbid, new_mbid);

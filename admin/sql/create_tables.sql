@@ -3,6 +3,11 @@ CREATE TABLE recording (
   added         TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE TABLE recording_redirect (
+  mbid          UUID NOT NULL,
+  new_mbid      UUID NOT NULL
+);
+
 CREATE TABLE recording_release_group (
   recording_mbid      UUID NOT NULL,
   release_group_mbid  UUID NOT NULL

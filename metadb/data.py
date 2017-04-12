@@ -74,10 +74,7 @@ def add_source(name):
         return {"name": name, "id": id}
 
 
-def add_recording_mbids(mbids):
-    """ Add some recording musicbrainzids to the recording table.
-        Returns mbids which were added.
-    """
+def _add_recording_mbids(connection, mbids):
     check_query = text("""
         SELECT mbid
           FROM recording
@@ -86,13 +83,20 @@ def add_recording_mbids(mbids):
         INSERT INTO recording (mbid)
              VALUES (:mbid)""")
     ret = []
-    with db.engine.begin() as connection:
-        for mbid in mbids:
-            result = connection.execute(check_query, {"mbid": mbid})
-            if not result.rowcount:
-                connection.execute(insert_query, {"mbid": mbid})
-                ret.append(mbid)
+    for mbid in mbids:
+        result = connection.execute(check_query, {"mbid": mbid})
+        if not result.rowcount:
+            connection.execute(insert_query, {"mbid": mbid})
+            ret.append(mbid)
     return ret
+
+
+def add_recording_mbids(mbids):
+    """ Add some recording musicbrainzids to the recording table.
+        Returns mbids which were added.
+    """
+    with db.engine.begin() as connection:
+        return _add_recording_mbids(connection, mbids)
 
 
 def get_recording_mbids():
@@ -276,6 +280,30 @@ def _get_recording_meta(connection, recording_mbid):
 def get_recording_meta(recording_mbid):
     with db.engine.begin() as connection:
         return _get_recording_meta(connection, recording_mbid)
+
+
+def musicbrainz_check_mbid_redirect(query_mbid, actual_mbid):
+    """Check if we have redirected an mbid"""
+    if query_mbid == actual_mbid:
+        return
+
+    #
+    check_query = text("""
+        SELECT *
+          FROM recording_redirect
+         WHERE mbid = :mbid
+           AND new_mbid = :new_mbid""")
+
+    insert_redirect = text("""
+        INSERT INTO recording_redirect (mbid, new_mbid)
+             VALUES (:mbid, :new_mbid)""")
+
+    params = {"mbid": query_mbid, "new_mbid": actual_mbid}
+    with db.engine.begin() as connection:
+        res = connection.execute(check_query, params)
+        if not res.rowcount:
+            _add_recording_mbids(connection, [actual_mbid])
+            connection.execute(insert_redirect, params)
 
 
 def cache_musicbrainz_metadata(recording):

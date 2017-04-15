@@ -39,6 +39,31 @@ class DataTestCase(DatabaseTestCase):
         res = data.add_item(scraper, mbid, payload)
         self.assertEqual(res, False)
 
+    def test_get_recordings_missing_meta(self):
+        mbids = ["f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9", "4410602a-7ecc-43a3-94d0-cae6905dffa4",
+                 "77a81b61-da0e-451a-8b53-47d396946285"]
+        data.add_recording_mbids(mbids)
+
+        missing = data.get_recordings_missing_meta()
+        self.assertCountEqual(missing, mbids)
+
+        recording = {"mbid": "f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9",
+                     "name": "name",
+                     "artist_credit": "credit",
+                     "last_updated": datetime.datetime.now()}
+        with data.db.engine.begin() as connection:
+            data._add_recording_meta(connection, recording)
+
+        missing = data.get_recordings_missing_meta()
+        self.assertCountEqual(missing, ["4410602a-7ecc-43a3-94d0-cae6905dffa4", "77a81b61-da0e-451a-8b53-47d396946285"])
+
+        # Add a redirect
+        data.musicbrainz_check_mbid_redirect("4410602a-7ecc-43a3-94d0-cae6905dffa4", "77a81b61-da0e-451a-8b53-47d396946285")
+
+        missing = data.get_recordings_missing_meta()
+        print(missing)
+        self.assertCountEqual(missing, ["77a81b61-da0e-451a-8b53-47d396946285"])
+
 
 class MusicBrainzMetaTestCase(DatabaseTestCase):
     """Tests for the metadata tables

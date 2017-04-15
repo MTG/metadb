@@ -238,7 +238,10 @@ def get_recordings_missing_meta():
           FROM recording
      LEFT JOIN recording_meta
          USING (mbid)
-         WHERE recording_meta.mbid IS NULL""")
+     LEFT JOIN recording_redirect
+            ON recording.mbid = recording_redirect.mbid
+         WHERE recording_meta.mbid IS NULL
+           AND recording_redirect.mbid IS NULL""")
     with db.engine.begin() as connection:
         result = connection.execute(query)
         return [r[0] for r in result.fetchall()]

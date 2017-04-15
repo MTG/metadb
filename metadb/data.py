@@ -195,6 +195,13 @@ class JsonDateTimeEncoder(json.JSONEncoder):
 
 
 def _add_item_w_connection(connection, scraper, mbid, data):
+    check_item_query = text("""
+        SELECT *
+          FROM item
+         WHERE mbid = :mbid
+           AND scraper_id = :scraper_id
+        """)
+
     item_query = text("""
         INSERT INTO item (scraper_id, mbid)
              VALUES (:scraper_id, :mbid)
@@ -206,17 +213,23 @@ def _add_item_w_connection(connection, scraper, mbid, data):
              VALUES (:item_id, :data)
         """)
 
-    result = connection.execute(item_query, {"scraper_id": scraper["id"],
-                                             "mbid": mbid})
-    row = result.fetchone()
-    id = row.id
-    if isinstance(data, dict):
-        data = json.dumps(data, cls=JsonDateTimeEncoder)
-    connection.execute(item_data_query, {"item_id": id,
-                                         "data": data})
+    check_result = connection.execute(check_item_query,
+                                      {"scraper_id": scraper["id"],
+                                       "mbid": mbid})
 
-    return {"id": id, "mbid": mbid, "scraper_id": scraper["id"],
-            "data": data}
+    if not check_result.rowcount:
+        result = connection.execute(item_query, {"scraper_id": scraper["id"],
+                                                 "mbid": mbid})
+        row = result.fetchone()
+        id = row.id
+        if isinstance(data, dict):
+            data = json.dumps(data, cls=JsonDateTimeEncoder)
+        connection.execute(item_data_query, {"item_id": id,
+                                             "data": data})
+
+        return True
+    else:
+        return False
 
 
 def get_recordings_missing_meta():

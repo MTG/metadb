@@ -22,6 +22,23 @@ class DataTestCase(DatabaseTestCase):
         recordings = data.get_recording_mbids()
         self.assertEqual(3, len(recordings))
 
+    def test_add_item(self):
+        source = data.add_source("test_source")
+        scraper = data.add_scraper(source, "module", "version", "desc")
+
+        mbid = "e644e49b-1576-4ef2-b340-147590e9e5ac"
+        payload = {"test": "data"}
+
+        res = data.add_item(scraper, mbid, payload)
+        self.assertEqual(res, True)
+        # Can get the item
+        item = data.load_item(mbid, "test_source")
+        self.assertEqual(item["data"], payload)
+
+        # Adding the item again does nothing
+        res = data.add_item(scraper, mbid, payload)
+        self.assertEqual(res, False)
+
 
 class MusicBrainzMetaTestCase(DatabaseTestCase):
     """Tests for the metadata tables

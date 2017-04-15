@@ -11,7 +11,8 @@ ALTER TABLE item
 ALTER TABLE item_data
   ADD CONSTRAINT item_data_fk_item
   FOREIGN KEY (item_id)
-    REFERENCES item (id);
+    REFERENCES item (id)
+  ON DELETE CASCADE;
 
 ALTER TABLE recording_release_group
   ADD CONSTRAINT recording_release_group_fk_recording

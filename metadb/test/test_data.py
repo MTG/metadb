@@ -9,6 +9,31 @@ import mock
 
 class DataTestCase(DatabaseTestCase):
 
+    def test_add_scraper(self):
+        source = data.add_source("test_source")
+        scraper = data.add_scraper(source, "module", "recording", "0.1", "desc")
+
+        getscraper = data.load_scrapers_for_source(source)
+        self.assertEqual(len(getscraper), 1)
+        self.assertEqual(getscraper[0], scraper)
+
+    def test_load_latest_scraper(self):
+        source = data.add_source("test_source")
+        scrapernew = data.add_scraper(source, "module", "recording", "0.2", "desc")
+        scraperold = data.add_scraper(source, "module", "recording", "0.1", "desc")
+
+        # Even though we added them in the "wrong" order, latest is based on version number
+        getscraper = data.load_latest_scraper_for_source(source)
+        self.assertEqual(getscraper, scrapernew)
+
+    def test_load_latest_scraper_doesnt_exist(self):
+        source = data.add_source("test_source")
+        scraper = data.add_scraper(source, "module", "recording", "0.2", "desc")
+
+        other_source = data.add_source("other_source")
+        getscraper = data.load_latest_scraper_for_source(other_source)
+        self.assertIsNone(getscraper)
+
     def test_add_recording_mbids(self):
         recordings = data.get_recording_mbids()
         self.assertEqual(0, len(recordings))
@@ -24,7 +49,7 @@ class DataTestCase(DatabaseTestCase):
 
     def test_add_item(self):
         source = data.add_source("test_source")
-        scraper = data.add_scraper(source, "module", "version", "desc")
+        scraper = data.add_scraper(source, "module", "recording", "version", "desc")
 
         mbid = "e644e49b-1576-4ef2-b340-147590e9e5ac"
         payload = {"test": "data"}

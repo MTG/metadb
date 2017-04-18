@@ -43,6 +43,7 @@ CREATE TABLE scraper (
   module      TEXT, -- python module name
   version     TEXT, -- anything
   description TEXT, -- anything
+  mb_type     scraper_type NOT NULL,
   added       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

@@ -1,5 +1,5 @@
-source,module,version,description
-musicbrainz,metadb.scrapers.recording.musicbrainz,1.0
-lastfm,metadb.scrapers.recording.lastfm,1.0
-discogs,metadb.scrapers.release.discogs,1.0
-spotify,metadb.scrapers.recording.spotify,1.0
+source,module,mb_type,version,description
+musicbrainz,metadb.scrapers.recording.musicbrainz,recording,1.0
+lastfm,metadb.scrapers.recording.lastfm,recording,1.0
+discogs,metadb.scrapers.release.discogs,release_group,1.0
+spotify,metadb.scrapers.recording.spotify,release_group,1.0

@@ -123,20 +123,26 @@ def load_source(name):
     return None
 
 
-def add_scraper(source, module, version, description):
+def add_scraper(source, module, mb_type, version, description):
+    if mb_type not in ["recording", "release_group"]:
+        raise ValueError("Invalid mb_type. Must be one of [recording, release_group]")
+
     query = text("""
-        INSERT INTO scraper (source_id, module, version, description)
-             VALUES (:source_id, :module, :version, :description)
+        INSERT INTO scraper (source_id, module, mb_type, version, description)
+             VALUES (:source_id, :module, :mb_type, :version, :description)
           RETURNING id
         """)
     with db.engine.begin() as connection:
-        result = connection.execute(query, {"source_id": source["id"],
-                                            "module": module,
-                                            "version": version,
-                                            "description": description})
+        data = {"source_id": source["id"],
+                "module": module,
+                "mb_type": mb_type,
+                "version": version,
+                "description": description}
+        result = connection.execute(query, data)
         row = result.fetchone()
-        return {"id": row.id, "module": module,
-                "version": version, "description": description}
+
+        data["id"] = row.id
+        return data
 
 
 def load_scrapers_for_source(source):
@@ -144,7 +150,9 @@ def load_scrapers_for_source(source):
         SELECT id
              , source_id
              , module
+             , mb_type
              , version
+             , description
           FROM scraper
          WHERE source_id = :source_id
         """)
@@ -155,8 +163,10 @@ def load_scrapers_for_source(source):
         for r in rows:
             ret.append({"id": r.id,
                         "source_id": r.source_id,
+                        "module": r.module,
+                        "mb_type": r.mb_type,
                         "version": r.version,
-                        "module": r.module})
+                        "description": r.description})
         return ret
 
 
@@ -165,7 +175,9 @@ def load_latest_scraper_for_source(source):
         SELECT id
              , source_id
              , version
-             , scraper
+             , mb_type
+             , module
+             , description
           FROM scraper
          WHERE source_id = :source_id
       ORDER BY version DESC
@@ -177,8 +189,10 @@ def load_latest_scraper_for_source(source):
         if row:
             return {"id": row.id,
                     "source_id": row.source_id,
+                    "module": row.module,
+                    "mb_type": row.mb_type,
                     "version": row.version,
-                    "scraper": row.scraper}
+                    "description": row.description}
     return None
 
 

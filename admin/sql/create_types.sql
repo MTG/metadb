@@ -1,0 +1,1 @@
+CREATE TYPE scraper_type AS ENUM ('release_group', 'recording');

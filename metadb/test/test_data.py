@@ -5,6 +5,7 @@ import datetime
 import pytz
 import uuid
 import mock
+import copy
 
 
 class DataTestCase(DatabaseTestCase):
@@ -88,6 +89,83 @@ class DataTestCase(DatabaseTestCase):
         missing = data.get_recordings_missing_meta()
         print(missing)
         self.assertCountEqual(missing, ["77a81b61-da0e-451a-8b53-47d396946285"])
+
+
+class ScraperTestCase(DatabaseTestCase):
+    def test_get_unprocessed_recordings(self):
+        mbids = ["f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9", "4410602a-7ecc-43a3-94d0-cae6905dffa4",
+                 "77a81b61-da0e-451a-8b53-47d396946285"]
+        data.add_recording_mbids(mbids)
+        now = datetime.datetime.now()
+        meta = [{"mbid": "f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9",
+                 "name": "trackname1",
+                 "artist_credit": "test_artist_name1",
+                 "last_updated": now},
+                {"mbid": "4410602a-7ecc-43a3-94d0-cae6905dffa4",
+                 "name": "trackname2",
+                 "artist_credit": "test_artist_2",
+                 "last_updated": now},
+                {"mbid": "77a81b61-da0e-451a-8b53-47d396946285",
+                 "name": "trackname3",
+                 "artist_credit": "test_artist_2",
+                 "last_updated": now}]
+        with data.db.engine.begin() as connection:
+            for m in meta:
+                data._add_recording_meta(connection, m)
+
+        source = data.add_source("test_source")
+        scraper = data.add_scraper(source, "module", "recording", "0.1", "desc")
+
+        def get_meta_for_mbid(mbid):
+            item = [i for i in meta if i["mbid"] == mbid][0]
+            item = copy.deepcopy(item)
+            item.pop("last_updated")
+            return item
+
+        unprocessed = data.get_unprocessed_recordings_for_scraper(scraper)
+        self.assertEqual(len(unprocessed), 3)
+        self.assertEqual(get_meta_for_mbid(unprocessed[0]["mbid"]), unprocessed[0])
+        self.assertEqual(get_meta_for_mbid(unprocessed[1]["mbid"]), unprocessed[1])
+        self.assertEqual(get_meta_for_mbid(unprocessed[2]["mbid"]), unprocessed[2])
+
+        # Add some data for one mbid
+        data.add_item(scraper, "f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9", {"test": "data"})
+        unprocessed = data.get_unprocessed_recordings_for_scraper(scraper)
+        self.assertCountEqual(["4410602a-7ecc-43a3-94d0-cae6905dffa4",
+                               "77a81b61-da0e-451a-8b53-47d396946285"], [u["mbid"] for u in unprocessed])
+
+        # Make one of the mbids a redirect
+        data.musicbrainz_check_mbid_redirect("4410602a-7ecc-43a3-94d0-cae6905dffa4",
+                                             "77a81b61-da0e-451a-8b53-47d396946285")
+        unprocessed = data.get_unprocessed_recordings_for_scraper(scraper)
+        self.assertCountEqual(["77a81b61-da0e-451a-8b53-47d396946285"], [u["mbid"] for u in unprocessed])
+
+    def test_get_unprocessed_recordings_no_id(self):
+        """If we ask for unprocessed recordings and specify an ID which isn't in the
+           database, (or is already processed???), it returns nothing"""
+
+        mbids = ["f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9", "4410602a-7ecc-43a3-94d0-cae6905dffa4"]
+        data.add_recording_mbids(mbids)
+        now = datetime.datetime.now()
+        meta = [{"mbid": "f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9",
+                 "name": "trackname1",
+                 "artist_credit": "test_artist_name1",
+                 "last_updated": now}]
+        with data.db.engine.begin() as connection:
+            for m in meta:
+                data._add_recording_meta(connection, m)
+
+        source = data.add_source("test_source")
+        scraper = data.add_scraper(source, "module", "recording", "0.1", "desc")
+        data.add_item(scraper, "f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9", {"test": "data"})
+
+        # An mbid which already has data
+        unprocessed = data.get_unprocessed_recordings_for_scraper(scraper, "f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9")
+        self.assertEqual(len(unprocessed), 0)
+
+        # An mbid which isn't in the database
+        unprocessed = data.get_unprocessed_recordings_for_scraper(scraper, "868bdb9d-508d-446d-913b-6c1bd18c7ef5")
+        self.assertEqual(len(unprocessed), 0)
 
 
 class MusicBrainzMetaTestCase(DatabaseTestCase):

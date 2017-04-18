@@ -246,6 +246,31 @@ def _add_item_w_connection(connection, scraper, mbid, data):
         return False
 
 
+def get_unprocessed_recordings_for_scraper(scraper, mbid=None):
+    querytxt = """
+        SELECT recording.mbid::text
+             , recording_meta.name
+             , recording_meta.artist_credit
+          FROM recording
+          JOIN recording_meta
+         USING (mbid)
+     LEFT JOIN recording_redirect rr
+         USING (mbid)
+     LEFT JOIN item
+            ON recording.mbid = item.mbid
+           AND item.scraper_id = :scraper_id
+         WHERE item.mbid IS NULL
+           AND rr.mbid IS NULL
+    """
+    params = {"scraper_id": scraper["id"]}
+    if mbid is not None:
+        querytxt += """AND recording.mbid = :mbid"""
+        params["mbid"] = mbid
+    with db.engine.begin() as connection:
+        result = connection.execute(text(querytxt), params)
+        return [dict(r) for r in result]
+
+
 def get_recordings_missing_meta():
     query = text("""
         SELECT recording.mbid::text

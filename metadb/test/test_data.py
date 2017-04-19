@@ -167,6 +167,38 @@ class ScraperTestCase(DatabaseTestCase):
         unprocessed = data.get_unprocessed_recordings_for_scraper(scraper, "868bdb9d-508d-446d-913b-6c1bd18c7ef5")
         self.assertEqual(len(unprocessed), 0)
 
+    def test_get_unprocessed_release_groups(self):
+        now = datetime.datetime.now()
+        meta = [{"mbid": "79333adb-bcde-4c7f-b204-918d5ca57f41",
+                 "name": "rg_title1",
+                 "artist_credit": "test_artist_name1",
+                 "first_release_date": "2010",
+                 "last_updated": now},
+                {"mbid": "006eb612-908a-484e-bc8a-17b5882d35c1",
+                 "name": "rg_title2",
+                 "artist_credit": "test_artist_name2",
+                 "first_release_date": "1995",
+                 "last_updated": now}]
+        with data.db.engine.begin() as connection:
+            for m in meta:
+                data._add_release_group_meta(connection, m)
+
+        source = data.add_source("test_source")
+        scraper = data.add_scraper(source, "module", "release_group", "0.1", "desc")
+
+        unprocessed = data.get_unprocessed_release_groups_for_scraper(scraper)
+        self.assertEqual(len(unprocessed), 2)
+
+        del meta[0]["last_updated"]
+        del meta[1]["last_updated"]
+        self.assertCountEqual(unprocessed, meta)
+
+        data.add_item(scraper, "79333adb-bcde-4c7f-b204-918d5ca57f41", {"test": "data"})
+
+        unprocessed = data.get_unprocessed_release_groups_for_scraper(scraper)
+        self.assertEqual(len(unprocessed), 1)
+        self.assertCountEqual(unprocessed, [meta[1]])
+
 
 class MusicBrainzMetaTestCase(DatabaseTestCase):
     """Tests for the metadata tables

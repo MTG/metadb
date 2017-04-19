@@ -259,12 +259,35 @@ def get_unprocessed_recordings_for_scraper(scraper, mbid=None):
      LEFT JOIN item
             ON recording.mbid = item.mbid
            AND item.scraper_id = :scraper_id
-         WHERE item.mbid IS NULL
+         WHERE item.mbid IS NULL 
            AND rr.mbid IS NULL
     """
     params = {"scraper_id": scraper["id"]}
     if mbid is not None:
         querytxt += """AND recording.mbid = :mbid"""
+        params["mbid"] = mbid
+    with db.engine.begin() as connection:
+        result = connection.execute(text(querytxt), params)
+        return [dict(r) for r in result]
+
+
+def get_unprocessed_release_groups_for_scraper(scraper, mbid=None):
+    querytxt = """
+        SELECT release_group.mbid::text
+             , release_group_meta.name
+             , release_group_meta.artist_credit
+             , release_group_meta.first_release_date
+          FROM release_group
+          JOIN release_group_meta
+         USING (mbid)
+     LEFT JOIN item
+            ON release_group.mbid = item.mbid
+           AND item.scraper_id = :scraper_id
+         WHERE item.mbid IS NULL 
+    """
+    params = {"scraper_id": scraper["id"]}
+    if mbid is not None:
+        querytxt += """AND release_group.mbid = :mbid"""
         params["mbid"] = mbid
     with db.engine.begin() as connection:
         result = connection.execute(text(querytxt), params)

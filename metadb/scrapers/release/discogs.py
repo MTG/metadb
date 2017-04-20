@@ -27,8 +27,6 @@ def scrape(query):
     if not artist or not release or not year:
         raise Exception("Artist, release, and year information is required. Query: %s" % json.dumps(query))
     print("Scraping recording information for", mbid + ":", artist, "-", release, "-", year)
-    artist = artist.decode('utf8')
-    release = release.decode('utf8')
 
     release_simple = re.sub(r'\W+', '', release.lower())
     year = year.split('-')[0]

@@ -2,8 +2,6 @@ import json
 import re
 import discogs_client
 
-TYPE = "release"
-
 DISCOGS_KEY = ""
 
 
@@ -45,4 +43,4 @@ def scrape(query):
     except ApiException as ex:
         raise
 
-    return data, TYPE
+    return data

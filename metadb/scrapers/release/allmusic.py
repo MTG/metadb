@@ -3,8 +3,6 @@ import json
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 
-TYPE = "release"
-
 session = requests.Session()
 adapter = HTTPAdapter(max_retries=5, pool_connections=100, pool_maxsize=100)
 session.mount("http://www.allmusic.com", adapter)
@@ -54,7 +52,7 @@ def scrape(query):
             release = parse_release(relres)
             data["album"] = release
 
-    return {"type": TYPE, "data": data}
+    return data
 
 
 def get_first_release(data, year):

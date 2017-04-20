@@ -93,19 +93,6 @@ def process(query):
         print(str(e))
         return
 
-    result_type = result["type"]
-    data = result.get("data")
-    response = result.get("response")
-    if data:
-        result = {
-                    'type': result_type,
-                    'mbid': query['mbid'],
-                    'scraper': query['module'],
-                    'result': data
-                 }
-    elif response:
-        result = response
-
     if query['save']:
         save(result, outfile)
     else:

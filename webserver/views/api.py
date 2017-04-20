@@ -49,6 +49,24 @@ def lookup_metadata(mbid=None):
     return jsonify({})
 
 
+@api_bp.route("/scrape/<source_name>", methods=["POST"])
+@api_bp.route("/scrape/<source_name>/<uuid:mbid>", methods=["POST"])
+@webserver.decorators.admin_required
+def scrape(source_name, mbid=None):
+    source = metadb.data.load_source(source_name)
+    scraper = metadb.data.load_latest_scraper_for_source(source)
+
+    if scraper["mb_type"] == "recording":
+        metadata = metadb.data.get_unprocessed_recordings_for_scraper(scraper, mbid)
+    elif scraper["mb_type"] == "release_group":
+        metadata = metadb.data.get_unprocessed_release_groups_for_scraper(scraper, mbid)
+
+    for m in metadata:
+        metadb.jobs.scrape.delay(scraper, m)
+
+    return jsonify({})
+
+
 @api_bp.route("/<uuid:mbid>/<source_name>")
 def load(mbid, source_name):
     data = metadb.data.load_item(mbid, source_name)

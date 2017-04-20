@@ -49,3 +49,14 @@ def scrape_musicbrainz(recording_mbid):
                 data.musicbrainz_check_mbid_redirect(recording_mbid, result["mbid"])
                 data.cache_musicbrainz_metadata(result)
             s_obj.dispose()
+
+
+@celery.task()
+def scrape(scraper, metadata):
+    s_obj = metadb.scrapers.create_scraper_object(scraper)
+    if s_obj:
+        s_obj.config()
+        result = s_obj.scrape(metadata)
+        if result:
+            data.add_item(scraper, metadata["mbid"], data=result)
+        s_obj.dispose()

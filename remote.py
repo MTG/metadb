@@ -21,6 +21,14 @@ def submit(host, token, file):
                   headers={"Authorization": "Token {}".format(token)})
 
 
+def scrape(host, token, source, mbid=None):
+    url = "http://{}/scrape/{}".format(host, source)
+    if mbid:
+        url = "{}/{}".format(url, mbid)
+    requests.post(url,
+                  headers={"Authorization": "Token {}".format(token)})
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", type=str, required=True, help="Access token")
@@ -30,11 +38,17 @@ def main():
 
     group.add_argument("-f", help="JSON file containing MBIDs")
     group.add_argument("-l", nargs="*", help="Look up metadata for new MBIDs")
+    group.add_argument("-s", action="store_true", help="Scrape some data")
+
+    parser.add_argument("-r", type=str, help="Source to scrape")
+    parser.add_argument("-m", type=str, help="MBID to process")
 
     args = parser.parse_args()
     if args.f:
         submit(args.n, args.t, args.f)
-    else:
+    elif args.s:
+        scrape(args.n, args.t, args.r, args.m)
+    elif args.l:
         if len(args.l) == 0:
             mbid = None
         else:

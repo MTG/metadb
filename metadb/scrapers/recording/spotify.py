@@ -4,6 +4,14 @@ TYPE = "recording"
 
 sp = spotipy.Spotify()
 
+
+def config():
+    pass
+
+
+def dispose():
+    pass
+
 def get_artist(name):
     results = sp.search(q='artist:' + name, type='artist')
     items = results['artists']['items']

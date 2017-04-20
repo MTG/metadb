@@ -1,11 +1,18 @@
-import json
 import re
 import discogs_client
-import time
 
 TYPE = "recording"
 
 DISCOGS_KEY = ""
+
+
+def config():
+    pass
+
+
+def dispose():
+    pass
+
 
 class ApiException(Exception):
     pass

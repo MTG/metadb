@@ -1,13 +1,21 @@
 import json
 import re
 import discogs_client
-import time
 
 TYPE = "release"
 
 DISCOGS_KEY = ""
 
+
 class ApiException(Exception):
+    pass
+
+
+def config():
+    pass
+
+
+def dispose():
     pass
 
 

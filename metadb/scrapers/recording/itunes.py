@@ -1,13 +1,19 @@
 import requests
 from requests.adapters import HTTPAdapter
-import urllib.parse
-from metadb import log
 
 TYPE = "recording"
 
 sess = requests.Session()
 adapter = HTTPAdapter(max_retries=5, pool_connections=100, pool_maxsize=100)
 sess.mount("https://itunes.apple.com", adapter)
+
+
+def config():
+    pass
+
+
+def dispose():
+    pass
 
 
 def do_itunes_lookup(artist, title):

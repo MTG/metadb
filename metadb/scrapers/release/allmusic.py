@@ -1,15 +1,7 @@
 import requests
-import os
-import sys
 import json
-import errno
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
-import time
-import random
-
-from metadb import util
-from metadb import log
 
 TYPE = "release"
 
@@ -19,10 +11,20 @@ session.mount("http://www.allmusic.com", adapter)
 
 session_cookies = {}
 
+
+def config():
+    pass
+
+
+def dispose():
+    pass
+
+
 def _get_cookies():
     headers = query_data()
     r = session.get("http://www.allmusic.com/", headers=headers)
     session_cookies['allmusic_session'] = r.cookies.get('allmusic_session')
+
 
 def scrape(query):
     if not session_cookies:
@@ -54,6 +56,7 @@ def scrape(query):
 
     return {"type": TYPE, "data": data}
 
+
 def get_first_release(data, year):
     if data:
         if year:
@@ -68,6 +71,7 @@ def get_first_release(data, year):
                 content = load_release(releaseurl)
                 return content
     return {}
+
 
 def parse_release(data):
     s = BeautifulSoup(data, "html5lib")
@@ -106,10 +110,12 @@ def load_release(url):
     r = session.get(url, headers=headers, cookies=session_cookies)
     return r.content
 
+
 def search(artist, release):
     headers = query_data()
     r = session.get('http://www.allmusic.com/search/albums/{} {}'.format(artist, release), headers=headers, cookies=session_cookies)
     return r.content
+
 
 def parse_search(data, artist, release):
     s = BeautifulSoup(data, "html5lib")

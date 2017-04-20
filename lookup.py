@@ -89,7 +89,6 @@ def process(query):
     try:
         result = module.scrape(query)
     except Exception as e:
-        raise
         print(str(e))
         return
 

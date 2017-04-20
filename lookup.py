@@ -28,6 +28,7 @@ def save(result, outfile):
 
 
 def process_items(items, module, save, numworkers):
+    allprocessed = True
     with concurrent.futures.ThreadPoolExecutor(max_workers=numworkers) as executor:
         future_to_row = {}
 
@@ -43,9 +44,12 @@ def process_items(items, module, save, numworkers):
             i = future_to_row[future]
             try:
                 result = future.result()
+                allprocessed = allprocessed and result
             except Exception as exc:
                 raise
                 print('%r generated an exception: %s' % (i, exc))
+
+    return not allprocessed
 
 def process_file(module, filename, numworkers, save=False):
     data = []
@@ -59,14 +63,19 @@ def process_file(module, filename, numworkers, save=False):
     CHUNK_SIZE = 1
 
     for items in util.chunks(data, CHUNK_SIZE):
-        process_items(items, module, save, numworkers)
+        skipped = process_items(items, module, save, numworkers)
         done += CHUNK_SIZE
         durdelta, remdelta = util.stats(done, total, starttime)
-        time.sleep(random.uniform(.5, 1.5))
+        if not skipped:
+            time.sleep(random.uniform(.5, 1.5))
         log.info("Done %s/%s in %s; %s remaining", done, total, str(durdelta), str(remdelta))
 
 
 def process(query):
+    """Process a single item.
+    Returns True if an item was successfully looked up and written to file
+    Returns False if the file for this item already exists.
+    """
 
     if not 'module' in query or not query['module']:
         raise Exception("Missing module information for the query", json.dumps(query))
@@ -84,18 +93,20 @@ def process(query):
         mbid = query['mbid']
         outfile = os.path.join(query['module'], mbid[:2], "{}.json".format(mbid))
         if os.path.exists(outfile):
-            return
+            return False
 
     try:
         result = module.scrape(query)
     except Exception as e:
         print(str(e))
-        return
+        return True
 
     if query['save']:
         save(result, outfile)
     else:
         print(json.dumps(result, indent=2))
+
+    return True
 
 
 if __name__ == "__main__":

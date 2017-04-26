@@ -1,3 +1,17 @@
+""" MetaDB bulk processing tools.
+
+Lookup: Look up metadata on remote sites
+
+Usage:
+    bulk_lookup.py --module metadb.scrapers.recording.lastfm --csv datafile.csv --save
+
+The argument to --csv is the result of `bulk_get_unprocessed.py`
+
+Specify --save to save results to file, otherwise results will
+be printed to stdout.
+Results will be saved to a directory named the same as the module name.
+
+"""
 from argparse import ArgumentParser
 import importlib
 import sys

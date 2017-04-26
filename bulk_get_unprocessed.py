@@ -1,4 +1,16 @@
-# Dump items which haven't been processed to
+""" MetaDB bulk processing tools.
+
+get_unprocessed: Get mbids and metadata that have not been looked up\
+                 for a particular source
+
+Usage:
+    bulk_get_unprocessed.py --source lastfm --outname x [-n n|-p p]
+
+use -n to write n rows per file
+use -p to write exactly p files
+omit to write one file
+
+"""
 
 import argparse
 import csv

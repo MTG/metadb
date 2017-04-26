@@ -1,5 +1,13 @@
 METADB_DEBUG=True
 
+RABBITMQ_ERLANG_COOKIE=asharedsecret
+RABBITMQ_DEFAULT_USER=metadb_rabbit
+RABBITMQ_DEFAULT_PASS=rabbitmqpassword
+RABBITMQ_DEFAULT_VHOST=metadb
+
+METADB_CELERY_BROKER_URL=amqp://metadb_rabbit:rabbitmqpassword@rabbitmq:5672/metadb
+
+
 METADB_REDIS_HOST=redis
 
 METADB_DB_URI=postgresql://metadb@db/metadb

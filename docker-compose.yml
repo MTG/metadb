@@ -24,6 +24,7 @@ services:
     depends_on:
       - db
       - redis
+      - rabbitmq
   celery:
     build: .
     env_file:
@@ -33,6 +34,7 @@ services:
     command: celery -A metadb.jobs:celery worker --loglevel=info
     depends_on:
       - redis
+      - rabbitmq
   flower:  #  Django app to monitor Celery status
     build: ./docker/flower/
     env_file:
@@ -42,3 +44,10 @@ services:
       - "5555:5555"
     depends_on:
       - celery
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: metadb-rabbitmq
+    env_file:
+      - environment
+    ports:
+      - "15672:15672"

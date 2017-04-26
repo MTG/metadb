@@ -236,7 +236,7 @@ def _add_item_w_connection(connection, scraper, mbid, data):
                                                  "mbid": mbid})
         row = result.fetchone()
         id = row.id
-        if isinstance(data, dict):
+        if isinstance(data, dict) or isinstance(data, list):
             data = json.dumps(data, cls=JsonDateTimeEncoder)
         connection.execute(item_data_query, {"item_id": id,
                                              "data": data})
@@ -259,7 +259,7 @@ def get_unprocessed_recordings_for_scraper(scraper, mbid=None):
      LEFT JOIN item
             ON recording.mbid = item.mbid
            AND item.scraper_id = :scraper_id
-         WHERE item.mbid IS NULL 
+         WHERE item.mbid IS NULL
            AND rr.mbid IS NULL
     """
     params = {"scraper_id": scraper["id"]}
@@ -283,7 +283,7 @@ def get_unprocessed_release_groups_for_scraper(scraper, mbid=None):
      LEFT JOIN item
             ON release_group.mbid = item.mbid
            AND item.scraper_id = :scraper_id
-         WHERE item.mbid IS NULL 
+         WHERE item.mbid IS NULL
     """
     params = {"scraper_id": scraper["id"]}
     if mbid is not None:

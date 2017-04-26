@@ -65,6 +65,21 @@ class DataTestCase(DatabaseTestCase):
         res = data.add_item(scraper, mbid, payload)
         self.assertEqual(res, False)
 
+    def test_add_item_no_data(self):
+        """Adding an item with no data will add an item row but no
+           item_data, causing load_item to return nothing."""
+        source = data.add_source("test_source")
+        scraper = data.add_scraper(source, "module", "recording", "version", "desc")
+
+        mbid = "e644e49b-1576-4ef2-b340-147590e9e5ac"
+
+        res = data.add_item(scraper, mbid, {})
+        # return value says we added something
+        self.assertTrue(res)
+        # but there is no data
+        item = data.load_item(mbid, "test_source")
+        self.assertIsNone(item["data"])
+
     def test_get_recordings_missing_meta(self):
         mbids = ["f84ca3bf-e561-41bb-9ba3-f8b7d79e3af9", "4410602a-7ecc-43a3-94d0-cae6905dffa4",
                  "77a81b61-da0e-451a-8b53-47d396946285"]

@@ -236,10 +236,11 @@ def _add_item_w_connection(connection, scraper, mbid, data):
                                                  "mbid": mbid})
         row = result.fetchone()
         id = row.id
-        if isinstance(data, dict) or isinstance(data, list):
-            data = json.dumps(data, cls=JsonDateTimeEncoder)
-        connection.execute(item_data_query, {"item_id": id,
-                                             "data": data})
+        if data:
+            if isinstance(data, dict) or isinstance(data, list):
+                data = json.dumps(data, cls=JsonDateTimeEncoder)
+            connection.execute(item_data_query, {"item_id": id,
+                                                 "data": data})
 
         return True
     else:

@@ -15,7 +15,7 @@ def main():
     recordings = get_recordings()
     total = len(recordings)
     done = 0
-    starttime = time.time()
+    starttime = time.monotonic()
     log.info("starting..., %s recordings to process", total)
 
     for reclist in util.chunks(recordings, 10000):

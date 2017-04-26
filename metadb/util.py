@@ -21,7 +21,7 @@ def mkdir_p(path):
 
 
 def stats(done, total, starttime):
-    nowtime = time.time()
+    nowtime = time.monotonic()
     position = done*1.0 / total
     duration = round(nowtime - starttime)
     durdelta = datetime.timedelta(seconds=duration)

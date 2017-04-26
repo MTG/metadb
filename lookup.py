@@ -58,7 +58,7 @@ def process_file(module, filename, numworkers, save=False):
             data.append(query)
 
     total = len(data)
-    starttime = time.time()
+    starttime = time.monotonic()
     done = 0
     CHUNK_SIZE = 1
 

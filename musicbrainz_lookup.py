@@ -66,7 +66,7 @@ def main():
     mbids = get_mbids()
     total = len(mbids)
 
-    starttime = time.time()
+    starttime = time.monotonic()
     done = 0
     for mblist in util.chunks(mbids, 100):
         lookup(mblist, scraper)

@@ -21,6 +21,30 @@ def dispose():
     pass
 
 
+def parse_db_data(mbid, data, writer):
+
+    if "track" in data:
+        data = data["track"]
+    if "toptags" not in data:
+        print("{} notoptags".format(mbid), file=sys.stderr)
+        return
+    toptags = data["toptags"]
+
+    if "tag" not in toptags:
+        print("{} notag".format(mbid), file=sys.stderr)
+        return
+    else:
+        tags = toptags["tag"]
+        # If there's just 1 tag it's in the dict, not a list
+        if isinstance(tags, dict):
+            tags = [tags]
+        towrite = [mbid]
+        for t in tags:
+            towrite.append(t["name"])
+            towrite.append(t["count"])
+        writer.writerow(towrite)
+
+
 def query(method, **kwargs):
     params = dict(kwargs)
     params["method"] = method

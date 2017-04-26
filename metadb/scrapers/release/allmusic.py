@@ -18,6 +18,26 @@ def dispose():
     pass
 
 
+def parse_db_data(mbid, data, writer):
+
+    album = data["album"]
+    if album:
+        genres = album["genres"]
+        styles = album["styles"]
+
+        if genres:
+            row = [mbid, "genre"]
+            row.extend(genres)
+            writer.writerow(row)
+        if styles:
+            row = [mbid, "style"]
+            row.extend(styles)
+            writer.writerow(row)
+    else:
+        print("{} nodata".format(mbid), file=sys.stderr)
+
+
+
 def _get_cookies():
     headers = query_data()
     r = session.get("http://www.allmusic.com/", headers=headers)

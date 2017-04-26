@@ -17,6 +17,24 @@ def dispose():
     pass
 
 
+def parse_db_data(mbid, data, writer):
+    if not data:
+        print('{} nodata'.format(mbid), file=sys.stderr)
+    for r in data:
+        id = r['id']
+        genre = r['genre']
+        style = r['style']
+        type = r['type']
+        if genre:
+            row = [mbid, id, type, 'genre']
+            row.extend(genre)
+            writer.writerow(row)
+        if style:
+            row = [mbid, id, type, 'style']
+            row.extend(style)
+            writer.writerow(row)
+
+
 def scrape(query):
 
     mbid = query['mbid']

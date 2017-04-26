@@ -1,7 +1,5 @@
 import spotipy
 
-TYPE = "recording"
-
 sp = spotipy.Spotify()
 
 
@@ -12,6 +10,7 @@ def config():
 def dispose():
     pass
 
+
 def get_artist(name):
     results = sp.search(q='artist:' + name, type='artist')
     items = results['artists']['items']
@@ -21,7 +20,11 @@ def get_artist(name):
         return None
 
 
-def scrape(mbid, artist, title, metadata=None):
+def scrape(query):
+    mbid = query['mbid']
+    artist = query['artist_credit']
+    title = query['name']
+
     data = None
     spot_artist = get_artist(artist)
     if len(spot_artist['genres']) > 0:

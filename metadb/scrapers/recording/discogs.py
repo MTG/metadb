@@ -21,8 +21,8 @@ class ApiException(Exception):
 def scrape(query):
 
     mbid = query['mbid']
-    artist = query['artist']
-    title = query['recording']
+    artist = query['artist_credit']
+    title = query['name']
 
     if not artist or not title:
         raise Exception("Artist and recording strings are required")

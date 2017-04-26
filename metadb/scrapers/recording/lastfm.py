@@ -51,6 +51,8 @@ def scrape(meta):
     except ApiException as ex:
         raise
 
-    if data:
+    if "toptags" not in data or "tag" not in data["toptags"]:
+        return {}
+    else:
         return data
 

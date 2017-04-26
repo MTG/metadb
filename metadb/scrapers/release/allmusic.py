@@ -52,7 +52,11 @@ def scrape(query):
             release = parse_release(relres)
             data["album"] = release
 
-    return data
+        return data
+    else:
+        # No search results, return empty data
+        return {}
+
 
 
 def get_first_release(data, year):

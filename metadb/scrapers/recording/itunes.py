@@ -1,5 +1,6 @@
 import requests
 from requests.adapters import HTTPAdapter
+import json
 
 TYPE = "recording"
 
@@ -24,17 +25,24 @@ def do_itunes_lookup(artist, title):
 
     headers = {"User-Agent": "curl/7.47.0"}
     r = sess.get(url, params=params, headers=headers)
-    return r.json()
+    try:
+        return r.json()
+    except json.decoder.JSONDecodeError:
+        # If there is no match, this will be an empty string
+        content = r.content
+        if len(content) == 0:
+            return {}
+        else:
+            raise
 
 
 def scrape(query):
-    title = query.get("recording")
-    artist = query.get("artist")
+    title = query.get("name")
+    artist = query.get("artist_credit")
     if not title or not artist:
         return
 
-    return {"type": TYPE,
-            "response": do_itunes_lookup(artist, title)}
+    return do_itunes_lookup(artist, title)
 
 
 

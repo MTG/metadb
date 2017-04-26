@@ -1,4 +1,6 @@
 METADB_DEBUG=True
+DEPLOY_ENV=dev
+MDB_SECRET_KEY=thisisasecretkeyforproductionenv
 
 RABBITMQ_ERLANG_COOKIE=asharedsecret
 RABBITMQ_DEFAULT_USER=metadb_rabbit
@@ -16,3 +18,6 @@ METADB_ADMIN_URI=postgresql://postgres@db/template1
 
 METADB_MUSICBRAINZ_DB_URI=
 MUSICBRAINZ_HOST=musicbrainz.org
+
+METADB_LOG_SENTRY_ENABLED=False
+METADB_SENTRY_DSN=

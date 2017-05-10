@@ -59,8 +59,10 @@ def parse_db_data(mbid, data, writer):
     if styles:
         styles = extract_style(styles, genres)
 
-    genres_with_no_styles = set(genres) - set([g for g, s in styles])
-    data = styles + [[g] for g in genres_with_no_styles]
+    # We want to add all genres of a style, even if they aren't
+    # explicitly listed
+    all_genres = set(genres) | set([g for g, s in styles])
+    data = styles + [[g] for g in all_genres]
 
     data = ["---".join(list(d)).lower() for d in data]
 
@@ -68,7 +70,7 @@ def parse_db_data(mbid, data, writer):
         mbid = [mbid]
 
     for m in mbid:
-        row = [m] + data
+        row = [m] + sorted(data)
         writer.writerow(row)
 
 

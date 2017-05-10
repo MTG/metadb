@@ -51,22 +51,21 @@ def styles(tree):
 def extract_style(styles, genres):
     results = []
 
+    genre_set = set(genres)
     for s in styles:
         if s not in DATA["GENRE_TREE_styles"]:
-            #print "Unknown subgenre", s
             continue
 
         matched = False
         for style_path in DATA["GENRE_TREE_paths"]:
-            if s == style_path[-1] and style_path[0] in genres:
+            if s == style_path[-1] and style_path[0] in genre_set:
                 results.append(style_path)
                 matched = True
 
-        #if not matched:
-        #    print "Cannot match", s.encode("utf-8"), "to", genres
-
-    genres_with_no_styles = set(genres) - set([r[0] for r in results])
-    results += [(g,) for g in genres_with_no_styles]
+    # We want to add all genres of a style, even if they aren't
+    # explicitly listed
+    all_genres = genre_set | set([r[0] for r in results])
+    results += [(g,) for g in all_genres]
     return results
 
 
@@ -100,7 +99,7 @@ def parse_db_data(mbid, data, writer):
                 mbid = [mbid]
 
             for m in mbid:
-                row = [m] + annotations
+                row = [m] + sorted(annotations)
                 writer.writerow(row)
 
 

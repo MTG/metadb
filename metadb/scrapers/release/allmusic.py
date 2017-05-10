@@ -2,13 +2,14 @@ import requests
 import json
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
+import yaml
 
 session = requests.Session()
 adapter = HTTPAdapter(max_retries=5, pool_connections=100, pool_maxsize=100)
 session.mount("http://www.allmusic.com", adapter)
 
 session_cookies = {}
-
+DATA = {}
 
 def config():
     pass
@@ -18,6 +19,57 @@ def dispose():
     pass
 
 
+def config_dump(data_file):
+    GENRE_TREE = yaml.load(open(data_file))
+    DATA["GENRE_TREE"] = GENRE_TREE
+    GENRE_TREE_paths = styles(GENRE_TREE)
+    DATA["GENRE_TREE_paths"] = GENRE_TREE_paths
+    GENRE_TREE_styles = [p[-1] for p in GENRE_TREE_paths]
+    DATA["GENRE_TREE_styles"] = set(GENRE_TREE_styles)
+
+
+def styles(tree):
+    styles = []
+    for g in tree:
+        if type(tree[g]) is list:
+            for gs in tree[g]:
+                if type(gs) is str:
+                    styles.append((g, gs))
+                if type(gs) is dict:
+                    for gss in gs:
+                        for gsss in gs[gss]:
+                            styles.append((g, gss, gsss))
+        elif type(tree[g]) is dict:
+            for gs in tree[g]:
+                for gss in tree[g][gs]:
+                    styles.append((g, gs, gss))
+        else:
+            raise Exception("Unexpected genre tree format")
+    return styles
+
+
+def extract_style(styles, genres):
+    results = []
+
+    for s in styles:
+        if s not in DATA["GENRE_TREE_styles"]:
+            #print "Unknown subgenre", s
+            continue
+
+        matched = False
+        for style_path in DATA["GENRE_TREE_paths"]:
+            if s == style_path[-1] and style_path[0] in genres:
+                results.append(style_path)
+                matched = True
+
+        #if not matched:
+        #    print "Cannot match", s.encode("utf-8"), "to", genres
+
+    genres_with_no_styles = set(genres) - set([r[0] for r in results])
+    results += [(g,) for g in genres_with_no_styles]
+    return results
+
+
 def parse_db_data(mbid, data, writer):
 
     album = data["album"]
@@ -25,17 +77,28 @@ def parse_db_data(mbid, data, writer):
         genres = album["genres"]
         styles = album["styles"]
 
-        if genres:
-            row = [mbid, "genre"]
-            row.extend(genres)
-            writer.writerow(row)
-        if styles:
-            row = [mbid, "style"]
-            row.extend(styles)
-            writer.writerow(row)
-    else:
-        print("{} nodata".format(mbid), file=sys.stderr)
+        if not genres:
+            return
 
+        # only use 1st and 2nd level genres
+        annotations = []
+        for a in extract_style(styles, genres):
+            if len(a) == 0:
+                continue
+            elif len(a) == 2 or len(a) == 1:
+                annotations.append(a)
+            elif len(a) == 3:
+                annotations.append((a[0], a[1]))
+                annotations.append((a[0], a[2]))
+
+        # remove duplicates that might occur after extracting only 2nd level subgenres
+        annotations = list(set(annotations))
+
+        if annotations:
+            for a in annotations:
+                row = [mbid]
+                row.extend(a)
+                writer.writerow(row)
 
 
 def _get_cookies():

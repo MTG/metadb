@@ -62,16 +62,14 @@ def parse_db_data(mbid, data, writer):
     genres_with_no_styles = set(genres) - set([g for g, s in styles])
     data = styles + [[g] for g in genres_with_no_styles]
 
-    if isinstance(mbid, list):
-        # We have a list of recording mbids, we should write the genre data once for each mbid
-        for m in mbid:
-            for d in data:
-                row = [m] + d
-                writer.writerow(row)
-    else:
-        for d in data:
-            row = [mbid] + d
-            writer.writerow(row)
+    data = ["---".join(list(d)).lower() for d in data]
+
+    if not isinstance(mbid, list):
+        mbid = [mbid]
+
+    for m in mbid:
+        row = [m] + data
+        writer.writerow(row)
 
 
 def scrape(query):

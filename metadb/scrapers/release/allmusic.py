@@ -93,11 +93,14 @@ def parse_db_data(mbid, data, writer):
 
         # remove duplicates that might occur after extracting only 2nd level subgenres
         annotations = list(set(annotations))
+        annotations = ["---".join(list(a)).lower() for a in annotations]
 
         if annotations:
-            for a in annotations:
-                row = [mbid]
-                row.extend(a)
+            if not isinstance(mbid, list):
+                mbid = [mbid]
+
+            for m in mbid:
+                row = [m] + annotations
                 writer.writerow(row)
 
 

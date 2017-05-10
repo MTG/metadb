@@ -30,18 +30,18 @@ def config_dump(data_file):
 
 def styles(tree):
     styles = []
-    for g in tree:
-        if type(tree[g]) is list:
-            for gs in tree[g]:
-                if type(gs) is str:
+    for g, child in tree.items():
+        if isinstance(child, list):
+            for gs in child:
+                if isinstance(gs, str):
                     styles.append((g, gs))
-                if type(gs) is dict:
-                    for gss in gs:
-                        for gsss in gs[gss]:
+                if isinstance(gs, dict):
+                    for gss, gsschild in gs.items():
+                        for gsss in gsschild:
                             styles.append((g, gss, gsss))
-        elif type(tree[g]) is dict:
-            for gs in tree[g]:
-                for gss in tree[g][gs]:
+        elif type(child) is dict:
+            for gs, gschild in child.items():
+                for gss in gschild:
                     styles.append((g, gs, gss))
         else:
             raise Exception("Unexpected genre tree format")

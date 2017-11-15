@@ -9,7 +9,7 @@ WORKDIR /code
 ADD pip.conf /etc/pip.conf
 
 ADD requirements.lock /code/
-RUN pip install -r requirements.lock
+RUN pip install --no-cache-dir -r requirements.lock
 ADD requirements_dev /code/
-RUN pip install  -r requirements_dev
+RUN pip install --no-cache-dir  -r requirements_dev
 ADD . /code/
